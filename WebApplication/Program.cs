@@ -1,5 +1,7 @@
 namespace WebApplication
 {
+    using Autofac.Extensions.DependencyInjection;
+
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
@@ -19,9 +21,16 @@ namespace WebApplication
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.ConfigureAppConfiguration(
+                        config =>
+                        {
+                            config.AddJsonFile("dbsettings.json", true);
+                            config.AddJsonFile("appsettings.json", true);
+                        })
+                    .UseStartup<Startup>();
                 });
     }
 }
