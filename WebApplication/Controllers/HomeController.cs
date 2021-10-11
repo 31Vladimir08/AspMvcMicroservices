@@ -1,6 +1,7 @@
 ﻿namespace WebApplication.Controllers
 {
     using AutoMapper;
+    using Microsoft.Extensions.Configuration;
 
     using DataAccessLayer.Interfaces;
     using DataAccessLayer.Models;
@@ -22,13 +23,15 @@
         private readonly ILogger<HomeController> _logger;
         private readonly IMapper _mapper;
         private readonly IAplicationDbContext _dbContext;
+        private readonly int _maxCountElement;
 
 
-        public HomeController(ILogger<HomeController> logger, IMapper mapper, IAplicationDbContext dbContext)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IMapper mapper, IAplicationDbContext dbContext)
         {
             _logger = logger;
             _mapper = mapper;
             _dbContext = dbContext;
+            _maxCountElement = string.IsNullOrWhiteSpace(configuration["DbSettings:MaxCountElements"]) ? 0 : int.Parse(configuration["DbSettings:MaxCountElements"]);
         }
 
         public IActionResult Index()
@@ -41,7 +44,7 @@
             var result = await Task.Run(
                 () =>
                 {
-                    var res = _dbContext.Set<ProductEntity>()
+                    var query = _dbContext.Set<ProductEntity>()
                     .Join(_dbContext.Set<SupplierEntity>().AsNoTracking(),
                     p => p.SupplierID,
                     c => c.SupplierID,
@@ -77,11 +80,14 @@
                         UnitsOnOrder = p.UnitsOnOrder,
                         ReorderLevel = p.ReorderLevel,
                         Discontinued = p.Discontinued
-                    })
-                    .AsNoTracking()
-                    .ToList();
+                    });
 
-                    return res;
+                    if (_maxCountElement != 0)
+                    {
+                        query = query.Take(_maxCountElement);
+                    }                    
+
+                    return query.AsNoTracking().ToList();
                 });
             return View(result ?? new List<ProductUI>());
         }
