@@ -23,5 +23,7 @@
         public bool Discontinued { get; set; }
 
         public Сategory Сategory { get; set; }
+
+        public Supplier Supplier { get; set; }
     }
 }

@@ -1,11 +1,8 @@
-﻿namespace DataAccessLayer.Models
+﻿namespace WebApplication.Models
 {
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
     using System.Collections.Generic;
 
-    public class SupplierEntity
+    public class Supplier
     {
         public int SupplierID { get; set; }
 
@@ -31,15 +28,6 @@
 
         public string HomePage {  get; set; }
 
-        public List<ProductEntity> Products { get; set; }
-    }
-
-    public class SupplierEntityConfig : IEntityTypeConfiguration<SupplierEntity>
-    {
-        public void Configure(EntityTypeBuilder<SupplierEntity> builder)
-        {
-            builder.ToTable("Suppliers");
-            builder.HasKey(u => u.SupplierID);
-        }
+        public List<Product> Products { get; set; }
     }
 }

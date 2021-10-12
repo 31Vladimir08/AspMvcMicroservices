@@ -1,14 +1,14 @@
 ﻿@model IEnumerable<WebApplication.Models.ProductUI>
 
 @{
-    ViewData["Title"] = "Product";
+    ViewData["Title"] = "GetProductsView";
 }
 
-<h1>Product</h1>
+<h1>GetProductsView</h1>
 
-@*<p>
-    <a asp-action="Create">Create New</a>
-</p>*@
+<p>
+    <a asp-action="CreateProduct">Create New</a>
+</p>
 <table class="table">
     <thead>
         <tr>
@@ -19,7 +19,13 @@
                 @Html.DisplayNameFor(model => model.ProductName)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.SupplierID)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.SupplierName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CategoryID)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.CategoryName)
@@ -55,7 +61,13 @@
                 @Html.DisplayFor(modelItem => item.ProductName)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.SupplierID)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.SupplierName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CategoryID)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.CategoryName)
@@ -78,11 +90,9 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Discontinued)
             </td>
-           @* <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>*@
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id=item.ProductID })
+            </td>
         </tr>
 }
     </tbody>

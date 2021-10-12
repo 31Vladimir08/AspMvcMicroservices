@@ -5,8 +5,6 @@
 
     using Microsoft.EntityFrameworkCore;
 
-    using System;
-
     public class AplicationDbContext : DbContext, IAplicationDbContext
     {
         public AplicationDbContext(DbContextOptions<AplicationDbContext> options)
