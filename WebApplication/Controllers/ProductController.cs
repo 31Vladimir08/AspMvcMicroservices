@@ -10,6 +10,7 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
 
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -111,27 +112,69 @@
                 {
                     var dto = _mapper.Map<Product>(personUi.Product);
                     var db = _mapper.Map<ProductEntity>(dto);
-                    _dbContext.Set<ProductEntity>().Add(db);
+                    try
+                    {
+                        _dbContext.Database.BeginTransaction();
+                        _dbContext.Set<ProductEntity>().Add(db);
+                        _dbContext.Database.CommitTransaction();
+                    }
+                    catch (Exception ex)
+                    {
+                        _dbContext.Database.RollbackTransaction();
+                        throw;
+                    }
                 });
             return RedirectToAction(nameof(GetProducts));
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(long? id)
+        public async Task<IActionResult> EditProduct(long? id)
         {
             if (id == null || id == 0)
             {
                 return NotFound();
             }
 
+            var productVM = await Task.Run(
+                () =>
+                {
+                    var prodVM = new ProductViewModel();
+                    var prodDb = _dbContext.Set<ProductEntity>().FirstOrDefault(x => x.ProductID == id);
+                    var catDb = _dbContext.Set<СategoryEntity>().AsNoTracking().ToList();
+                    var supDb = _dbContext.Set<SupplierEntity>().AsNoTracking().ToList();
+                    var prodDto = _mapper.Map<Product>(prodDb);
+                    prodVM.Product = _mapper.Map<ProductUI>(prodDto);
+                    prodVM.Categories = _mapper.Map<IEnumerable<Сategory>>(catDb);
+                    prodVM.Suppliers = _mapper.Map<IEnumerable<Supplier>>(supDb);
+
+                    return prodVM;
+                });
             
-            return View();
+
+            return View(productVM);
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditProduct(ProductUI personUi)
+        public async Task<IActionResult> EditProduct(ProductViewModel personUi)
         {
-            return View(personUi);
+            await Task.Run(
+                () =>
+                {
+                    var dto = _mapper.Map<Product>(personUi.Product);
+                    var db = _mapper.Map<ProductEntity>(dto);
+                    try
+                    {
+                        _dbContext.Database.BeginTransaction();
+                        _dbContext.Set<ProductEntity>().Update(db);
+                        _dbContext.Database.CommitTransaction();
+                    }
+                    catch (Exception ex)
+                    {
+                        _dbContext.Database.RollbackTransaction();
+                        throw;
+                    }
+                });
+            return RedirectToAction(nameof(GetProducts));
         }
     }
 }
