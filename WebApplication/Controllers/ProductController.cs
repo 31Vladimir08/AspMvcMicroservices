@@ -105,17 +105,23 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProduct(ProductViewModel personUi)
+        public async Task<IActionResult> CreateProduct(ProductViewModel productUI)
         {
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction(nameof(GetProducts));
+            }
+
             await Task.Run(
                 () =>
                 {
-                    var dto = _mapper.Map<Product>(personUi.Product);
+                    var dto = _mapper.Map<Product>(productUI.Product);
                     var db = _mapper.Map<ProductEntity>(dto);
                     try
                     {
                         _dbContext.Database.BeginTransaction();
                         _dbContext.Set<ProductEntity>().Add(db);
+                        _dbContext.SaveChanges();
                         _dbContext.Database.CommitTransaction();
                     }
                     catch (Exception ex)
@@ -155,17 +161,36 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditProduct(ProductViewModel personUi)
+        public async Task<IActionResult> EditProduct(ProductViewModel productUI)
         {
+            if (string.IsNullOrEmpty(productUI.Product.ProductName))
+            {
+                ModelState.AddModelError("Name", "Invalid name");
+            }
+            else if (productUI.Product.ProductName.Length > 10)
+            {
+                ModelState.AddModelError("Name", "Invalid string length");
+            }
+            else if (productUI.Product.UnitsOnOrder == null)
+            {
+                ModelState.AddModelError("Name", "Invalid Units on order");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction(nameof(GetProducts));
+            }
+
             await Task.Run(
                 () =>
                 {
-                    var dto = _mapper.Map<Product>(personUi.Product);
+                    var dto = _mapper.Map<Product>(productUI.Product);
                     var db = _mapper.Map<ProductEntity>(dto);
                     try
                     {
                         _dbContext.Database.BeginTransaction();
                         _dbContext.Set<ProductEntity>().Update(db);
+                        _dbContext.SaveChanges();
                         _dbContext.Database.CommitTransaction();
                     }
                     catch (Exception ex)
