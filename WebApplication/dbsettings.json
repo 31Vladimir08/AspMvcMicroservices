@@ -1,6 +1,6 @@
 {
   "DbSettings": {
-    "ConnectionString": "Server=DESKTOP-QGGR85T;Database=Northwind;Trusted_Connection=True;",
+    "ConnectionString": "Server=EPRUIZHW00CF;Database=Northwind;Trusted_Connection=True;",
     "MaxCountElements": 0
   }
 }

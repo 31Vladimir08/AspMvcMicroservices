@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace WebApplication
 {
     using Autofac;
@@ -8,18 +10,11 @@ namespace WebApplication
 
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.HttpsPolicy;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    using WebApplication.AutoMapperProfile;
+    using AutoMapperProfile;
 
     public class Startup
     {
@@ -29,7 +24,6 @@ namespace WebApplication
         }
 
         public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -44,8 +38,9 @@ namespace WebApplication
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
+            logger.LogInformation(Configuration["DbSettings:ConnectionString"]);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -1,4 +1,6 @@
-﻿namespace WebApplication.Controllers
+﻿using Microsoft.AspNetCore.Diagnostics;
+
+namespace WebApplication.Controllers
 {
     using AutoMapper;
 
@@ -84,7 +86,7 @@
 
                     return query.AsNoTracking().ToList();
                 });
-            return View(result ?? new List<ProductUI>());
+            return View(result);
         }
 
         [HttpGet]
@@ -173,12 +175,22 @@
             }
             else if (productUI.Product.UnitsOnOrder == null)
             {
-                ModelState.AddModelError("Name", "Invalid Units on order");
+                ModelState.AddModelError("Name", "Invalid units on order");
             }
 
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(GetProducts));
+                productUI = await Task.Run(
+                    () =>
+                    {
+                        var vm = productUI;
+                        var catDb = _dbContext.Set<СategoryEntity>().AsNoTracking().ToList();
+                        var supDb = _dbContext.Set<SupplierEntity>().AsNoTracking().ToList();
+                        vm.Categories = _mapper.Map<IEnumerable<Сategory>>(catDb);
+                        vm.Suppliers = _mapper.Map<IEnumerable<Supplier>>(supDb);
+                        return vm;
+                    });
+                return View(productUI);
             }
 
             await Task.Run(
