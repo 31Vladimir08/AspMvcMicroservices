@@ -1,6 +1,0 @@
-{
-  "DbSettings": {
-    "ConnectionString": "Server=EPRUIZHW00CF;Database=Northwind;Trusted_Connection=True;",
-    "MaxCountElements": 0
-  }
-}

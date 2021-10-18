@@ -22,7 +22,6 @@ namespace WebApplication
                     webBuilder.ConfigureAppConfiguration(
                         config =>
                         {
-                            config.AddJsonFile("dbsettings.json", true);
                             config.AddJsonFile("appsettings.json", true);
                         })
                     .UseStartup<Startup>();
