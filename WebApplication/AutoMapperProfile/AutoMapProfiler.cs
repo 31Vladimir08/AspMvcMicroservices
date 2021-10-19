@@ -1,4 +1,6 @@
-﻿namespace WebApplication.AutoMapperProfile
+﻿using WebApplication.ModelsUI;
+
+namespace WebApplication.AutoMapperProfile
 {
     using AutoMapper;
 

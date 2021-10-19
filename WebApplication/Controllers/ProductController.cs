@@ -1,26 +1,24 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using AutoMapper;
+
+using DataAccessLayer.Interfaces;
+using DataAccessLayer.Models;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+using WebApplication.Models;
+using WebApplication.ModelsUI;
+using WebApplication.ViewModels;
 
 namespace WebApplication.Controllers
 {
-    using AutoMapper;
-
-    using DataAccessLayer.Interfaces;
-    using DataAccessLayer.Models;
-
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Logging;
-
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    using WebApplication.Models;
-    using WebApplication.ViewModels;
-
     public class ProductController : Controller
     {
         private readonly ILogger<ProductController> _logger;

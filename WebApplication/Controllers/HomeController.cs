@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace WebApplication.Controllers
+﻿namespace WebApplication.Controllers
 {
 
     using Microsoft.AspNetCore.Mvc;

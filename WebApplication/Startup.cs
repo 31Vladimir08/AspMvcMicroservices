@@ -1,9 +1,10 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using WebApplication.Models;
-
 namespace WebApplication
 {
+    using System.Net;
+    using Microsoft.AspNetCore.Diagnostics;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
+    using WebApplication.Models;
     using Autofac;
     using Autofac.Extensions.DependencyInjection;
 
@@ -26,14 +27,15 @@ namespace WebApplication
         }
 
         public IConfiguration Configuration { get; }
+        private DbSettings Options { get; set; }
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var option = Configuration.GetSection(DbSettings.DbSettingsKey)
+            Options = Configuration.GetSection(DbSettings.DbSettingsKey)
                 .Get<DbSettings>();
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
-                    options.UseSqlServer(option.ConnectionString);
+                    options.UseSqlServer(Options.ConnectionString);
                 });
             services.AddAutoMapper(typeof(AutoMapProfiler), typeof(Startup));
             services.AddAutofac();
@@ -43,14 +45,32 @@ namespace WebApplication
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
-            logger.LogInformation(Configuration["DbSettings:ConnectionString"]);
+            logger.LogInformation(Options.ConnectionString);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler(errorApp =>
+                {
+                    errorApp.Run(async context =>
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; ;
+                        context.Response.ContentType = "text/html";
+
+                        await context.Response.WriteAsync("<html lang=\"en\"><body>\r\n");
+                        await context.Response.WriteAsync("ERROR!<br><br>\r\n");
+
+                        var exceptionHandlerPathFeature =
+                            context.Features.Get<IExceptionHandlerPathFeature>();
+
+                        logger.LogError(exceptionHandlerPathFeature?.Error.Message);
+
+                        if (exceptionHandlerPathFeature?.Error.Message != null)
+                            await context.Response.WriteAsync(exceptionHandlerPathFeature?.Error.Message);
+                    });
+                });
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }

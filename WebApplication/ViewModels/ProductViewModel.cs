@@ -1,4 +1,6 @@
-﻿namespace WebApplication.ViewModels
+﻿using WebApplication.ModelsUI;
+
+namespace WebApplication.ViewModels
 {
     using System.Collections.Generic;
 
