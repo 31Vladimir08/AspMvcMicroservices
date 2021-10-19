@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Extensions.Options;
 
 namespace WebApplication.Controllers
 {
@@ -25,25 +26,22 @@ namespace WebApplication.Controllers
         private readonly ILogger<ProductController> _logger;
         private readonly IMapper _mapper;
         private readonly IAplicationDbContext _dbContext;
-        private readonly int _maxCountElement;
+        private readonly DbSettings _options;
 
 
-        public ProductController(ILogger<ProductController> logger, IConfiguration configuration, IMapper mapper, IAplicationDbContext dbContext)
+        public ProductController(ILogger<ProductController> logger, IOptions<DbSettings> options, IMapper mapper, IAplicationDbContext dbContext)
         {
             _logger = logger;
             _mapper = mapper;
             _dbContext = dbContext;
-            _maxCountElement = string.IsNullOrWhiteSpace(configuration["DbSettings:MaxCountElements"]) ? 0 : int.Parse(configuration["DbSettings:MaxCountElements"]);
+            _options = options.Value;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
-            var result = await Task.Run(
-                () =>
-                {
-                    var query = _dbContext.Set<ProductEntity>()
-                    .Join(_dbContext.Set<SupplierEntity>().AsNoTracking(),
+            var query = _dbContext.Set<ProductEntity>()
+                    .Join(_dbContext.Set<SupplierEntity>(),
                     p => p.SupplierID,
                     c => c.SupplierID,
                     (p, c) => new ProductUI
@@ -60,7 +58,7 @@ namespace WebApplication.Controllers
                         ReorderLevel = p.ReorderLevel,
                         Discontinued = p.Discontinued
                     })
-                    .Join(_dbContext.Set<СategoryEntity>().AsNoTracking(),
+                    .Join(_dbContext.Set<СategoryEntity>(),
                     p => p.CategoryID,
                     c => c.CategoryID,
                     (p, c) => new ProductUI
@@ -79,31 +77,25 @@ namespace WebApplication.Controllers
                         Discontinued = p.Discontinued
                     });
 
-                    if (_maxCountElement != 0)
-                    {
-                        query = query.Take(_maxCountElement);
-                    }
+            if (!string.IsNullOrWhiteSpace(_options.MaxCountElements) && int.Parse(_options.MaxCountElements) > 0)
+            {
+                query = query.Take(int.Parse(_options.MaxCountElements));
+            }
 
-                    return query.AsNoTracking().ToList();
-                });
+            var result = await query.AsNoTracking().ToListAsync();
+            
             return View(result);
         }
 
         [HttpGet]
         public async Task<IActionResult> CreateProduct()
         {
-            
-            var productVM = await Task.Run(
-                () =>
-                {
-                    var prodVM = new ProductViewModel();
-                    var catDb = _dbContext.Set<СategoryEntity>().AsNoTracking().ToList();
-                    var supDb = _dbContext.Set<SupplierEntity>().AsNoTracking().ToList();
-                    prodVM.Categories = _mapper.Map<IEnumerable<Сategory>>(catDb);
-                    prodVM.Suppliers = _mapper.Map<IEnumerable<Supplier>>(supDb);
-                    return prodVM;
-                });
-            return View(productVM);
+            var prodVM = new ProductViewModel();
+            var catDb = await _dbContext.Set<СategoryEntity>().AsNoTracking().ToListAsync();
+            var supDb = await _dbContext.Set<SupplierEntity>().AsNoTracking().ToListAsync();
+            prodVM.Categories = _mapper.Map<IEnumerable<Сategory>>(catDb);
+            prodVM.Suppliers = _mapper.Map<IEnumerable<Supplier>>(supDb);
+            return View(prodVM);
         }
 
         [HttpPost]
@@ -114,24 +106,20 @@ namespace WebApplication.Controllers
                 return RedirectToAction(nameof(GetProducts));
             }
 
-            await Task.Run(
-                () =>
-                {
-                    var dto = _mapper.Map<Product>(productUI.Product);
-                    var db = _mapper.Map<ProductEntity>(dto);
-                    try
-                    {
-                        _dbContext.Database.BeginTransaction();
-                        _dbContext.Set<ProductEntity>().Add(db);
-                        _dbContext.SaveChanges();
-                        _dbContext.Database.CommitTransaction();
-                    }
-                    catch (Exception ex)
-                    {
-                        _dbContext.Database.RollbackTransaction();
-                        throw;
-                    }
-                });
+            var dto = _mapper.Map<Product>(productUI.Product);
+            var db = _mapper.Map<ProductEntity>(dto);
+            try
+            {
+                await _dbContext.Database.BeginTransactionAsync();
+                _dbContext.Set<ProductEntity>().Add(db);
+                await _dbContext.SaveChangesAsync();
+                await _dbContext.Database.CommitTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                _dbContext.Database.RollbackTransaction();
+                throw;
+            }
             return RedirectToAction(nameof(GetProducts));
         }
 
@@ -143,74 +131,46 @@ namespace WebApplication.Controllers
                 return NotFound();
             }
 
-            var productVM = await Task.Run(
-                () =>
-                {
-                    var prodVM = new ProductViewModel();
-                    var prodDb = _dbContext.Set<ProductEntity>().FirstOrDefault(x => x.ProductID == id);
-                    var catDb = _dbContext.Set<СategoryEntity>().AsNoTracking().ToList();
-                    var supDb = _dbContext.Set<SupplierEntity>().AsNoTracking().ToList();
-                    var prodDto = _mapper.Map<Product>(prodDb);
-                    prodVM.Product = _mapper.Map<ProductUI>(prodDto);
-                    prodVM.Categories = _mapper.Map<IEnumerable<Сategory>>(catDb);
-                    prodVM.Suppliers = _mapper.Map<IEnumerable<Supplier>>(supDb);
+            var prodVM = new ProductViewModel();
+            var prodDb = await _dbContext.Set<ProductEntity>().FirstOrDefaultAsync(x => x.ProductID == id);
+            var catDb = await _dbContext.Set<СategoryEntity>().AsNoTracking().ToListAsync();
+            var supDb = await _dbContext.Set<SupplierEntity>().AsNoTracking().ToListAsync();
+            var prodDto = _mapper.Map<Product>(prodDb);
+            prodVM.Product = _mapper.Map<ProductUI>(prodDto);
+            prodVM.Categories = _mapper.Map<IEnumerable<Сategory>>(catDb);
+            prodVM.Suppliers = _mapper.Map<IEnumerable<Supplier>>(supDb);
 
-                    return prodVM;
-                });
-            
 
-            return View(productVM);
+            return View(prodVM);
         }
 
         [HttpPost]
         public async Task<IActionResult> EditProduct(ProductViewModel productUI)
         {
-            if (string.IsNullOrEmpty(productUI.Product.ProductName))
-            {
-                ModelState.AddModelError("Name", "Invalid name");
-            }
-            else if (productUI.Product.ProductName.Length > 10)
-            {
-                ModelState.AddModelError("Name", "Invalid string length");
-            }
-            else if (productUI.Product.UnitsOnOrder == null)
-            {
-                ModelState.AddModelError("Name", "Invalid units on order");
-            }
-
             if (!ModelState.IsValid)
             {
-                productUI = await Task.Run(
-                    () =>
-                    {
-                        var vm = productUI;
-                        var catDb = _dbContext.Set<СategoryEntity>().AsNoTracking().ToList();
-                        var supDb = _dbContext.Set<SupplierEntity>().AsNoTracking().ToList();
-                        vm.Categories = _mapper.Map<IEnumerable<Сategory>>(catDb);
-                        vm.Suppliers = _mapper.Map<IEnumerable<Supplier>>(supDb);
-                        return vm;
-                    });
-                return View(productUI);
+                var vm = productUI;
+                var catDb = await _dbContext.Set<СategoryEntity>().AsNoTracking().ToListAsync();
+                var supDb = await _dbContext.Set<SupplierEntity>().AsNoTracking().ToListAsync();
+                vm.Categories = _mapper.Map<IEnumerable<Сategory>>(catDb);
+                vm.Suppliers = _mapper.Map<IEnumerable<Supplier>>(supDb);
+                return View(vm);
             }
 
-            await Task.Run(
-                () =>
-                {
-                    var dto = _mapper.Map<Product>(productUI.Product);
-                    var db = _mapper.Map<ProductEntity>(dto);
-                    try
-                    {
-                        _dbContext.Database.BeginTransaction();
-                        _dbContext.Set<ProductEntity>().Update(db);
-                        _dbContext.SaveChanges();
-                        _dbContext.Database.CommitTransaction();
-                    }
-                    catch (Exception ex)
-                    {
-                        _dbContext.Database.RollbackTransaction();
-                        throw;
-                    }
-                });
+            var dto = _mapper.Map<Product>(productUI.Product);
+            var db = _mapper.Map<ProductEntity>(dto);
+            try
+            {
+                await _dbContext.Database.BeginTransactionAsync();
+                _dbContext.Set<ProductEntity>().Update(db);
+                await _dbContext.SaveChangesAsync();
+                await _dbContext.Database.CommitTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                _dbContext.Database.RollbackTransaction();
+                throw;
+            }
             return RedirectToAction(nameof(GetProducts));
         }
     }

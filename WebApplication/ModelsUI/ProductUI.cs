@@ -7,7 +7,7 @@
         public int ProductID { get; set; }
 
         [Required (ErrorMessage = "Product name not specified")]
-        [StringLength(40, ErrorMessage = "String length must be up to 40 characters")]
+        [StringLength(40)]
         public string ProductName { get; set; }
 
         public int? SupplierID { get; set; }
@@ -18,7 +18,7 @@
 
         public string CategoryName { get; set; }
 
-        [StringLength(20, ErrorMessage = "String length must be up to 20 characters")]
+        [StringLength(20)]
         public string QuantityPerUnit { get; set; }
 
         public decimal? UnitPrice { get; set; }

@@ -32,13 +32,8 @@
         [HttpGet]
         public async Task<IActionResult> GetCategories()
         {
-            var result = await Task.Run(
-                () =>
-                {
-                    var db = _dbContext.Set<СategoryEntity>().AsNoTracking().ToList();
-                    var res = _mapper.Map<IEnumerable<Сategory>>(db);
-                    return res;
-                });
+            var db = await _dbContext.Set<СategoryEntity>().AsNoTracking().ToListAsync();
+            var result = _mapper.Map<IEnumerable<Сategory>>(db);
             return View(result ?? new List<Сategory>());
         }
     }

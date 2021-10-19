@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using WebApplication.Models;
 
 namespace WebApplication
 {
@@ -27,10 +29,11 @@ namespace WebApplication
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string connection = Configuration["DbSettings:ConnectionString"];
+            var option = Configuration.GetSection(DbSettings.DbSettingsKey)
+                .Get<DbSettings>();
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
-                    options.UseSqlServer(connection);
+                    options.UseSqlServer(option.ConnectionString);
                 });
             services.AddAutoMapper(typeof(AutoMapProfiler), typeof(Startup));
             services.AddAutofac();
