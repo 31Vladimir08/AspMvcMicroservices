@@ -75,9 +75,9 @@ namespace WebApplication.Controllers
                         Discontinued = p.Discontinued
                     });
 
-            if (!string.IsNullOrWhiteSpace(_options.MaxCountElements) && int.Parse(_options.MaxCountElements) > 0)
+            if (_options.MaxCountElements > 0)
             {
-                query = query.Take(int.Parse(_options.MaxCountElements));
+                query = query.Take(_options.MaxCountElements);
             }
 
             var result = await query.AsNoTracking().ToListAsync();

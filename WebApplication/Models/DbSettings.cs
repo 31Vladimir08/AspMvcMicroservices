@@ -5,6 +5,6 @@
         public const string DbSettingsKey = "DbSettings";
 
         public string ConnectionString { get; set; }
-        public string MaxCountElements { get; set; }
+        public int MaxCountElements { get; set; }
     }
 }
