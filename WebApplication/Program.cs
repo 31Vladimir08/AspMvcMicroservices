@@ -1,14 +1,11 @@
 namespace WebApplication
 {
+    using Autofac.Extensions.DependencyInjection;
+
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
 
     public class Program
     {
@@ -19,9 +16,21 @@ namespace WebApplication
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
+                    webBuilder.ConfigureAppConfiguration(
+                        config =>
+                        {
+                            config.AddJsonFile("appsettings.json", true);
+                        })
+                    .UseStartup<Startup>();
+                })
+                .ConfigureLogging((context, builder) 
+                    =>
+                    {
+                        builder.AddConfiguration(context.Configuration.GetSection("Logging"));
+                        builder.AddFile();
+                    });
+        }
 }
