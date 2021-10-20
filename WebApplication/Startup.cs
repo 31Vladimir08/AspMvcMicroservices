@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace WebApplication
 {
     using System.Net;
@@ -33,6 +35,7 @@ namespace WebApplication
         {
             Options = Configuration.GetSection(DbSettings.DbSettingsKey)
                 .Get<DbSettings>();
+            services.Configure<DbSettings>(Configuration.GetSection("DbSettings"));
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
