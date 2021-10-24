@@ -115,7 +115,7 @@ namespace WebApplication.Controllers
             }
             catch (Exception ex)
             {
-                _dbContext.Database.RollbackTransaction();
+                await _dbContext.Database.RollbackTransactionAsync();
                 throw;
             }
             return RedirectToAction(nameof(GetProducts));
