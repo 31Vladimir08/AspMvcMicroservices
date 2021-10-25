@@ -105,14 +105,7 @@
                     try
                     {
                         _dbContext.Database.BeginTransaction();
-                        if (category != null && category.Picture == null)
-                        {
-                            _dbContext.Set<СategoryEntity>().Add(db);
-                        }
-                        else if (category != null)
-                        {
-                            _dbContext.Set<СategoryEntity>().Update(db);
-                        }
+                        _dbContext.Set<СategoryEntity>().Update(db);
 
                         _dbContext.SaveChanges();
                         _dbContext.Database.CommitTransaction();
