@@ -1,3 +1,6 @@
+using System.IO;
+using System.Threading.Tasks;
+
 namespace WebApplication
 {
     using System.Net;
@@ -16,6 +19,7 @@ namespace WebApplication
     using Microsoft.Extensions.Hosting;
     using AutoMapperProfile;
     using DataAccessLayer.Interfaces;
+    using System;
 
     public class Startup
     {
@@ -81,6 +85,17 @@ namespace WebApplication
 
             app.UseAuthorization();
 
+            app.Use(async (context, next) =>
+            {
+                await next();
+                string path = context?.Request?.Path.Value?.ToLower();
+                
+                if (!string.IsNullOrWhiteSpace(path) && path.Contains("/category/getpicture") && context.Request.Method == "POST")
+                {
+                    await SetFileAsync(context.Request.Body, env, path);
+                }
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -89,9 +104,29 @@ namespace WebApplication
             });
         }
 
-        //public void ConfigureContainer(ContainerBuilder bilder)
-        //{
-        //    bilder.RegisterType<AplicationDbContext>().As<IAplicationDbContext>();
-        //}
+        private async Task SetFileAsync(Stream uploadedFile, IWebHostEnvironment env, string path)
+        {
+            await Task.Run(async () =>
+            {
+                using (var mem = new MemoryStream())
+                {
+                    char[] arr = path.ToCharArray();
+                    Array.Reverse(arr);
+                    string name = new string(arr);
+                    name = name.Substring(0, name.IndexOf('/'));
+                    arr = name.ToCharArray();
+                    Array.Reverse(arr);
+                    name = new string(arr);
+
+                    using (var memoryStream = new FileStream($"{env.ContentRootPath}/wwwroot/images/{name}.png", FileMode.OpenOrCreate))
+                    {
+                        await uploadedFile.CopyToAsync(mem);
+                        var array = new byte[memoryStream.Length];
+                        await memoryStream.WriteAsync(array, 0, array.Length);
+                        mem.Seek(0, SeekOrigin.Begin);
+                    }
+                }
+            });
+        }
     }
 }

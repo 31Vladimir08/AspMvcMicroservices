@@ -74,10 +74,9 @@
             }
 
 
-            var category = await SavePictureAsync((long)id, uploadedFile);
+            await SavePictureAsync((long)id, uploadedFile);
 
-
-            return View(category);
+            return RedirectToAction(nameof(GetCategories));
         }
 
         private async Task<Сategory> SavePictureAsync(long id, IFormFile uploadedFile)
@@ -101,6 +100,8 @@
                         {
                             ModelState.AddModelError("File", "The file is too large.");
                         }
+
+                        memoryStream.Seek(0, SeekOrigin.Begin);
                     }
                     try
                     {
