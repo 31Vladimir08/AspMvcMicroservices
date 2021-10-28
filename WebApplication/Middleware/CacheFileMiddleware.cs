@@ -4,16 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using WebApplication.Interfaces;
 
 namespace WebApplication.Middleware
 {
     public class CacheFileMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly CacheFile _ob;
+        private readonly ICacheFile _ob;
         private readonly IWebHostEnvironment _env;
 
-        public CacheFileMiddleware(RequestDelegate next, IWebHostEnvironment env, CacheFile ob)
+        public CacheFileMiddleware(RequestDelegate next, IWebHostEnvironment env, ICacheFile ob)
         {
             _next = next;
             _env = env;

@@ -11,7 +11,7 @@ namespace WebApplication.Extension
 {
     public static class MiddlewareExtensions
     {
-        public static IApplicationBuilder UseCacheFile(this IApplicationBuilder app, Action<CacheFile> param)
+        public static IApplicationBuilder UseCacheFile(this IApplicationBuilder app, Action<ICacheFile> param)
         {
             var ob = new CacheFile();
             param(ob);

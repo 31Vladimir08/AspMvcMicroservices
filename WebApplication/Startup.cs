@@ -89,7 +89,7 @@ namespace WebApplication
             app.UseCacheFile(x =>
             {
                 x.SetParam(
-                    Path.Combine(env.ContentRootPath, "wwwroot/images"));
+                    Path.Combine(env.ContentRootPath, "wwwroot\\images"));
             });
             app.Use(async (context, next) =>
             {
