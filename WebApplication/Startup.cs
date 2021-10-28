@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using WebApplication.Extension;
 
 namespace WebApplication
 {
@@ -85,11 +86,16 @@ namespace WebApplication
 
             app.UseAuthorization();
 
+            app.UseCacheFile(x =>
+            {
+                x.SetParam(
+                    Path.Combine(env.ContentRootPath, "wwwroot/images"));
+            });
             app.Use(async (context, next) =>
             {
                 await next();
                 string path = context?.Request?.Path.Value?.ToLower();
-                
+
                 if (!string.IsNullOrWhiteSpace(path) && path.Contains("/category/getpicture") && context.Request.Method == "POST")
                 {
                     await SetFileAsync(context.Request.Body, env, path);
