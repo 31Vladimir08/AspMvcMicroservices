@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using WebApplication.Middleware;
 
 namespace WebApplication.Controllers
