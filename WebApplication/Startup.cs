@@ -89,17 +89,8 @@ namespace WebApplication
             app.UseCacheFile(x =>
             {
                 x.SetParam(
-                    Path.Combine(env.ContentRootPath, "wwwroot\\images"));
-            });
-            app.Use(async (context, next) =>
-            {
-                await next();
-                string path = context?.Request?.Path.Value?.ToLower();
-
-                if (!string.IsNullOrWhiteSpace(path) && path.Contains("/category/getpicture") && context.Request.Method == "POST")
-                {
-                    await SetFileAsync(context.Request.Body, env, path);
-                }
+                    Path.Combine(env.ContentRootPath, "wwwroot\\images"),
+                    minutes: 1);
             });
 
             app.UseEndpoints(endpoints =>
@@ -107,31 +98,6 @@ namespace WebApplication
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
-        }
-
-        private async Task SetFileAsync(Stream uploadedFile, IWebHostEnvironment env, string path)
-        {
-            await Task.Run(async () =>
-            {
-                using (var mem = new MemoryStream())
-                {
-                    char[] arr = path.ToCharArray();
-                    Array.Reverse(arr);
-                    string name = new string(arr);
-                    name = name.Substring(0, name.IndexOf('/'));
-                    arr = name.ToCharArray();
-                    Array.Reverse(arr);
-                    name = new string(arr);
-
-                    using (var memoryStream = new FileStream($"{env.ContentRootPath}/wwwroot/images/{name}.png", FileMode.OpenOrCreate))
-                    {
-                        await uploadedFile.CopyToAsync(mem);
-                        var array = new byte[memoryStream.Length];
-                        await memoryStream.WriteAsync(array, 0, array.Length);
-                        mem.Seek(0, SeekOrigin.Begin);
-                    }
-                }
             });
         }
     }

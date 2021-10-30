@@ -2,17 +2,17 @@
 
 namespace WebApplication.Middleware
 {
-    public class CacheFile : ICacheFile
+    public class CacheFileProperties : ICacheFileProperties
     {
         public string Pach  { get; private set; }
         public int MaxCount { get; private set; }
-        public int Timer { get; private set; }
+        public int Minutes { get; private set; }
 
-        public void SetParam(string path, int maxCount = 10, int timer = 1000)
+        public void SetParam(string path, int maxCount = 10, int minutes = 1000)
         {
             Pach = path;
             MaxCount = maxCount;
-            Timer = timer;
+            Minutes = minutes;
         }
     }
 }
