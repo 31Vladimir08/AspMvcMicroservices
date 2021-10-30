@@ -18,6 +18,7 @@ namespace WebApplication.Middleware
         private readonly ICacheFileProperties _ob;
         private readonly IWebHostEnvironment _env;
         private readonly XmlSerializer _xmlSerializer;
+        public static readonly object HttpContextItemsCacheFileMiddlewareKey = new();
         private Images Images { get; set; }
 
         public CacheFileMiddleware(RequestDelegate next, IWebHostEnvironment env, ICacheFileProperties ob)
@@ -51,7 +52,7 @@ namespace WebApplication.Middleware
 
                 var categoryId = SetCategoryIdForFile(context.Request.Path);
 
-                if (Images.Pictures.Count >= _ob.MaxCount || Images.Pictures.All(x => x.CategoryID != categoryId))
+                if (Images.Pictures.Count >= _ob.MaxCount && Images.Pictures.All(x => x.CategoryID != categoryId))
                     return;
 
                 if (Images.Pictures.All(x => x.CategoryID != categoryId))
@@ -103,13 +104,14 @@ namespace WebApplication.Middleware
                             var image = Images.Pictures.FirstOrDefault(x => x.CategoryID == categoryId);
                             image.DateOfLastReading = DateTime.Now;
                             byte[] array = new byte[fileStream.Length];
+                            fileStream.Read(array, 0, array.Length);
+                            context.Items[HttpContextItemsCacheFileMiddlewareKey] = array;
                         }
                     }
                     catch (FileNotFoundException e)
                     {
                         //ignore
                     }
-                    
                 });
         }
 

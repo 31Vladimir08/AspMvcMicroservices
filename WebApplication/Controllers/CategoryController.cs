@@ -1,4 +1,8 @@
-﻿namespace WebApplication.Controllers
+﻿using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Caching.Memory;
+using WebApplication.Middleware;
+
+namespace WebApplication.Controllers
 {
     using AutoMapper;
 
@@ -23,12 +27,14 @@
         private readonly ILogger<CategoryController> _logger;
         private readonly IMapper _mapper;
         private readonly IAplicationDbContext _dbContext;
+        private readonly IMemoryCache _memoryCache;
 
-        public CategoryController(ILogger<CategoryController> logger, IMapper mapper, IAplicationDbContext dbContext)
+        public CategoryController(ILogger<CategoryController> logger, IMapper mapper, IAplicationDbContext dbContext, IMemoryCache memoryCache)
         {
             _logger = logger;
             _mapper = mapper;
             _dbContext = dbContext;
+            _memoryCache = memoryCache;
         }
 
         [HttpGet]
@@ -47,7 +53,16 @@
                 return NotFound();
             }
 
-            var res = await _dbContext.Set<СategoryEntity>().FirstOrDefaultAsync(x => x.CategoryID == id);
+            HttpContext.Items
+                .TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey,
+                    out var middlewareSetValue);
+            if (!_memoryCache.TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, out var value))
+            {
+                _memoryCache.Set(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, middlewareSetValue, TimeSpan.FromSeconds(10));
+            }
+            
+            var res = await _dbContext.Set<СategoryEntity>()
+                .FirstOrDefaultAsync(x => x.CategoryID == id);
             var result = _mapper.Map<Сategory>(res);
             return View(result);
         }
@@ -58,6 +73,12 @@
             if (id == null || id == 0)
             {
                 return NotFound();
+            }
+
+            _memoryCache.TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, out var value);
+            if (value != null)
+            {
+                return File((byte[])value, "image/png");
             }
 
             var res = await _dbContext.Set<СategoryEntity>().AsNoTracking().FirstOrDefaultAsync(x => x.CategoryID == id);

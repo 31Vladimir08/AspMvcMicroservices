@@ -1,5 +1,4 @@
 using System.IO;
-using System.Threading.Tasks;
 using WebApplication.Extension;
 
 namespace WebApplication
@@ -20,7 +19,6 @@ namespace WebApplication
     using Microsoft.Extensions.Hosting;
     using AutoMapperProfile;
     using DataAccessLayer.Interfaces;
-    using System;
 
     public class Startup
     {
@@ -36,13 +34,13 @@ namespace WebApplication
         {
             Options = Configuration.GetSection(DbSettings.DbSettingsKey)
                 .Get<DbSettings>();
+            services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
                 });
             services.AddAutoMapper(typeof(AutoMapProfiler), typeof(Startup));
-            //services.AddAutofac();
             services.AddControllersWithViews();
             services.AddScoped<IAplicationDbContext, AplicationDbContext>();
         }
@@ -90,7 +88,7 @@ namespace WebApplication
             {
                 x.SetParam(
                     Path.Combine(env.ContentRootPath, "wwwroot\\images"),
-                    minutes: 1);
+                    minutes: 5);
             });
 
             app.UseEndpoints(endpoints =>
