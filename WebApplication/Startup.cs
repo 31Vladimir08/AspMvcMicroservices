@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using WebApplication.Extension;
 
@@ -88,7 +89,7 @@ namespace WebApplication
             {
                 x.SetParam(
                     Path.Combine(env.ContentRootPath, "wwwroot\\images"),
-                    minutes: 5);
+                    cacheExpirationTime: TimeSpan.FromMinutes(5));
             });
 
             app.UseEndpoints(endpoints =>

@@ -1,4 +1,5 @@
-﻿using WebApplication.Interfaces;
+﻿using System;
+using WebApplication.Interfaces;
 
 namespace WebApplication.Middleware
 {
@@ -6,13 +7,13 @@ namespace WebApplication.Middleware
     {
         public string Pach  { get; private set; }
         public int MaxCount { get; private set; }
-        public int Minutes { get; private set; }
+        public TimeSpan CacheExpirationTime { get; private set; }
 
-        public void SetParam(string path, int maxCount = 10, int minutes = 1000)
+        public void SetParam(string path, int maxCount = 10, TimeSpan? cacheExpirationTime = null)
         {
             Pach = path;
             MaxCount = maxCount;
-            Minutes = minutes;
+            CacheExpirationTime = cacheExpirationTime ?? TimeSpan.FromMinutes(10);
         }
     }
 }

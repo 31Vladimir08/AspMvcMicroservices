@@ -155,28 +155,26 @@ namespace WebApplication.Middleware
                     Thread.Sleep(10000);
                     token.ThrowIfCancellationRequested();
                     var images = GetImagesDeserialize();
-                    var d = images.Pictures
+                    var isImagesSerialize = false;
+                    var _ = images.Pictures
                         .AsParallel()
                         .Where(
                         x =>
                         {
-                            return (DateTime.Now - x.DateOfLastReading).Minutes > _ob.Minutes;
-                        })
-                        .ToList();
-
-                    if (!d.Any())
-                        continue;
-
-                    d.ForEach(
-                        x =>
-                        {
+                            if (DateTime.Now.Subtract(x.DateOfLastReading) <= _ob.CacheExpirationTime) 
+                                return false;
                             new FileInfo($"{_ob.Pach}\\{x.CategoryID}.png").Delete();
                             Images.Pictures.Remove(x);
-                        });
+                            isImagesSerialize = true;
+                            return true;
+                        }).ToList();
+
+                    if (!isImagesSerialize)
+                        continue;
                     
                     ImagesSerialize();
                 }
-            });
+            }, token);
         }
     }
 }
