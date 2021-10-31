@@ -61,7 +61,16 @@ namespace WebApplication.Controllers
             }
             
             var res = await _dbContext.Set<СategoryEntity>()
-                .FirstOrDefaultAsync(x => x.CategoryID == id);
+                .AsNoTracking()
+                .Where(x => x.CategoryID == id)
+                .Select(x => new СategoryEntity
+                {
+                    CategoryID = x.CategoryID,
+                    CategoryName = x.CategoryName,
+                    Description = x.Description,
+                    Products = x.Products
+                })
+                .FirstOrDefaultAsync();
             var result = _mapper.Map<Сategory>(res);
             return View(result);
         }
@@ -80,7 +89,15 @@ namespace WebApplication.Controllers
                 return File((byte[])value, "image/png");
             }
 
-            var res = await _dbContext.Set<СategoryEntity>().AsNoTracking().FirstOrDefaultAsync(x => x.CategoryID == id);
+            var res = await _dbContext.Set<СategoryEntity>()
+                .AsNoTracking()
+                .Where(x => x.CategoryID == id)
+                .Select(x => new СategoryEntity
+                {
+                    CategoryID = x.CategoryID,
+                    Picture = x.Picture
+                })
+                .FirstOrDefaultAsync();
             var image = res.Picture;
             return File(image, "image/png");
         }
