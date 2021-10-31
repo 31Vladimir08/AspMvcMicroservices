@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using WebApplication.Extension;
+using WebApplication.Filters;
+using WebApplication.Interfaces;
+using WebApplication.Services;
 
 namespace WebApplication
 {
@@ -44,6 +47,9 @@ namespace WebApplication
             services.AddAutoMapper(typeof(AutoMapProfiler), typeof(Startup));
             services.AddControllersWithViews();
             services.AddScoped<IAplicationDbContext, AplicationDbContext>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<LogingCallsActionFilter>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

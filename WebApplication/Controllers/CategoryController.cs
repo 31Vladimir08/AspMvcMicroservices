@@ -1,50 +1,50 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using WebApplication.Filters;
+using WebApplication.Interfaces;
 using WebApplication.Middleware;
 
 namespace WebApplication.Controllers
 {
     using AutoMapper;
-
-    using DataAccessLayer.Interfaces;
     using DataAccessLayer.Models;
 
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Threading.Tasks;
 
     using WebApplication.Models;
 
+    [ServiceFilter(typeof(LogingCallsActionFilter))]
     public class CategoryController : Controller
     {
         private readonly ILogger<CategoryController> _logger;
         private readonly IMapper _mapper;
-        private readonly IAplicationDbContext _dbContext;
+        private readonly ICategoryService _categoryService;
         private readonly IMemoryCache _memoryCache;
 
-        public CategoryController(ILogger<CategoryController> logger, IMapper mapper, IAplicationDbContext dbContext, IMemoryCache memoryCache)
+        public CategoryController(ILogger<CategoryController> logger, IMapper mapper, ICategoryService categoryService, IMemoryCache memoryCache)
         {
             _logger = logger;
             _mapper = mapper;
-            _dbContext = dbContext;
+            _categoryService = categoryService;
             _memoryCache = memoryCache;
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<IActionResult> GetCategories()
         {
-            var db = await _dbContext.Set<СategoryEntity>().AsNoTracking().ToListAsync();
-            var result = _mapper.Map<IEnumerable<Сategory>>(db);
+            var result = await _categoryService.GetCategoriesAsync();
             return View(result ?? new List<Сategory>());
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<IActionResult> GetPicture(long? id)
         {
             if (id == null || id == 0)
@@ -52,30 +52,25 @@ namespace WebApplication.Controllers
                 return NotFound();
             }
 
-            HttpContext.Items
-                .TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey,
-                    out var middlewareSetValue);
-            if (!_memoryCache.TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, out var value))
+            if (HttpContext != null)
             {
-                _memoryCache.Set(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, middlewareSetValue, TimeSpan.FromSeconds(10));
-            }
-            
-            var res = await _dbContext.Set<СategoryEntity>()
-                .AsNoTracking()
-                .Where(x => x.CategoryID == id)
-                .Select(x => new СategoryEntity
+                HttpContext.Items
+                    .TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey,
+                        out var middlewareSetValue);
+                if (!_memoryCache.TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey,
+                    out var value))
                 {
-                    CategoryID = x.CategoryID,
-                    CategoryName = x.CategoryName,
-                    Description = x.Description,
-                    Products = x.Products
-                })
-                .FirstOrDefaultAsync();
-            var result = _mapper.Map<Сategory>(res);
+                    _memoryCache.Set(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, middlewareSetValue,
+                        TimeSpan.FromSeconds(10));
+                }
+            }
+
+            var result = await _categoryService.GetСategoryAsync((int)id);
             return View(result);
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<ActionResult> GetImage(long? id)
         {
             if (id == null || id == 0)
@@ -83,75 +78,54 @@ namespace WebApplication.Controllers
                 return NotFound();
             }
 
-            _memoryCache.TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, out var value);
-            if (value != null)
+            if (_memoryCache != null)
             {
-                return File((byte[])value, "image/png");
-            }
-
-            var res = await _dbContext.Set<СategoryEntity>()
-                .AsNoTracking()
-                .Where(x => x.CategoryID == id)
-                .Select(x => new СategoryEntity
+                _memoryCache.TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, out var value);
+                if (value != null)
                 {
-                    CategoryID = x.CategoryID,
-                    Picture = x.Picture
-                })
-                .FirstOrDefaultAsync();
-            var image = res.Picture;
+                    return File((byte[])value, "image/png");
+                }
+            }
+            
+            var image = await _categoryService.GetСategoryImageAsync((int)id);
             return File(image, "image/png");
         }
 
         [HttpPost]
-        public async Task<ActionResult> GetPicture(long? id, IFormFile uploadedFile)
+        [ServiceFilter(typeof(LogingCallsActionFilter))]
+        public async Task<ActionResult> GetPicture(int? id, IFormFile uploadedFile)
         {
             if (id == null || id == 0)
             {
                 return NotFound();
             }
 
-
-            await SavePictureAsync((long)id, uploadedFile);
-
+            var category = await _categoryService.GetСategoryAsync((int)id);
+            await SavePictureAsync(category, uploadedFile);
+            await _categoryService.EditСategoryAsync(category);
             return RedirectToAction(nameof(GetCategories));
         }
 
-        private async Task<Сategory> SavePictureAsync(long id, IFormFile uploadedFile)
+        private async Task<Сategory> SavePictureAsync(Сategory category, IFormFile uploadedFile)
         {
             var result = await Task.Run(
                 () =>
                 {
-                    var db = _dbContext.Set<СategoryEntity>().AsNoTracking().FirstOrDefault(x => x.CategoryID == id);
-                    var category = _mapper.Map<Сategory>(db);
+                    if (category == null)
+                        return null;
                     using (var memoryStream = new MemoryStream())
                     {
-                        uploadedFile.CopyTo(memoryStream);
+                        uploadedFile?.CopyTo(memoryStream);
 
                         // Upload the file if less than 2 MB
                         if (memoryStream.Length < 2097152)
                         {
                             category.Picture = memoryStream.ToArray();
-                            db = _mapper.Map<СategoryEntity>(category);
                         }
                         else
                         {
                             ModelState.AddModelError("File", "The file is too large.");
                         }
-
-                        memoryStream.Seek(0, SeekOrigin.Begin);
-                    }
-                    try
-                    {
-                        _dbContext.Database.BeginTransaction();
-                        _dbContext.Set<СategoryEntity>().Update(db);
-
-                        _dbContext.SaveChanges();
-                        _dbContext.Database.CommitTransaction();
-                    }
-                    catch (Exception ex)
-                    {
-                        _dbContext.Database.RollbackTransaction();
-                        throw;
                     }
 
                     return category;

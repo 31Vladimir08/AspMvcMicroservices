@@ -1,13 +1,18 @@
-﻿namespace WebApplication.Controllers
+﻿using WebApplication.Filters;
+
+namespace WebApplication.Controllers
 {
 
     using Microsoft.AspNetCore.Mvc;
+    using System;
     using System.Diagnostics;
 
     using WebApplication.Models;
 
+    [ServiceFilter(typeof(LogingCallsActionFilter))]
     public class HomeController : Controller
     {
+        [ServiceFilter(typeof(LogingCallsActionFilter))]
         public IActionResult Index()
         {
             return View();
