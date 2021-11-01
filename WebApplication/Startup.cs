@@ -97,12 +97,17 @@ namespace WebApplication
                     Path.Combine(env.ContentRootPath, "wwwroot\\images"),
                     cacheExpirationTime: TimeSpan.FromMinutes(5));
             });
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    name: "images",
+                    pattern: "images/{id?}",
+                    defaults: new { controller = "Category", action = "GetPicture" });
+
+                endpoints.MapControllerRoute(
+                        name: "default",
+                        pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

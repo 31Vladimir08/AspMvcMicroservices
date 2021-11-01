@@ -1,16 +1,12 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using WebApplication.Controllers;
 using WebApplication.Interfaces;
-using WebApplication.Middleware;
 using WebApplication.Models;
-using WebApplication.ModelsUI;
-using WebApplication.ViewModels;
 
 namespace WebApplicationTests
 {
