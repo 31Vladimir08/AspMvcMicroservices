@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -179,19 +175,23 @@ namespace WebApplication.Middleware
             {
                 while (true)
                 {
-                    Thread.Sleep(10000);
+                    Thread.Sleep(100000);
                     token.ThrowIfCancellationRequested();
                     var images = GetImagesDeserialize();
                     var isImagesSerialize = false;
                     var _ = images.Pictures
-                        .AsParallel()
                         .Where(
                         x =>
                         {
                             if (DateTime.Now.Subtract(x.DateOfLastReading) <= _ob.CacheExpirationTime) 
                                 return false;
-                            new FileInfo($"{_ob.Pach}\\{x.CategoryID}.png").Delete();
-                            Images.Pictures.Remove(x);
+                            var fileInf = new FileInfo($"{_ob.Pach}\\{x.CategoryID}.png");
+                            if (fileInf.Exists)
+                                fileInf.Delete();
+                            if (Images.Pictures.Contains(x))
+                            {
+                                Images.Pictures.Remove(x);
+                            }
                             isImagesSerialize = true;
                             return true;
                         }).ToList();
