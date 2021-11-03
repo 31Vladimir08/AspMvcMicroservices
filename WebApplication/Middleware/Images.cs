@@ -8,9 +8,9 @@ namespace WebApplication.Middleware
     {
         public Images()
         {
-            Pictures = new List<Image>();
+            Pictures = new List<ImageClass>();
         }
 
-        public List<Image> Pictures { get; set; }
+        public List<ImageClass> Pictures { get; set; }
     }
 }

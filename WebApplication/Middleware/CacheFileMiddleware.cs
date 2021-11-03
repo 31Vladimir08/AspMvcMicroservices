@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -32,31 +36,46 @@ namespace WebApplication.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            await GetFileFromCacheAsync(context);
-            await AddFileToCacheAsync(context);
-            await _next(context);
+            var originalBody = context.Response.Body;
+
+            try
+            {
+                using (var memStream = new MemoryStream())
+                {
+                    context.Response.Body = memStream;
+                    await GetFileFromCacheAsync(context);
+
+                    await _next(context);
+
+                    memStream.Position = 0;
+                    
+                    await AddFileToCacheAsync(context, memStream);
+                    memStream.Position = 0;
+                    await memStream.CopyToAsync(originalBody);
+                }
+
+            }
+            finally
+            {
+                context.Response.Body = originalBody;
+            }
         }
 
-        private async Task AddFileToCacheAsync(HttpContext context)
+        private async Task AddFileToCacheAsync(HttpContext context, MemoryStream memory)
         {
             await Task.Run(() =>
             {
-                if (string.IsNullOrWhiteSpace(_ob.Pach) || !context.Request.Path.ToString().Contains("/Category/GetPicture") ||
-                    context.Request.Method != "POST") 
+                var route = context.Request.RouteValues;
+                if (string.IsNullOrWhiteSpace(_ob.Pach) || route["controller"]?.ToString() != "Category" ||
+                    route["action"]?.ToString() != "GetImage")
                     return;
-
-                var file = context.Request.Form.Files.FirstOrDefault();
-                if (file?.ContentType != "image/png")
-                    return;
-
                 var categoryId = SetCategoryIdForFile(context.Request.Path);
-
                 if (Images.Pictures.Count >= _ob.MaxCount && Images.Pictures.All(x => x.CategoryID != categoryId))
                     return;
 
                 if (Images.Pictures.All(x => x.CategoryID != categoryId))
                 {
-                    Images.Pictures.Add(new Image()
+                    Images.Pictures.Add(new ImageClass()
                     {
                         CategoryID = categoryId,
                         DateOfLastReading = DateTime.Now
@@ -65,21 +84,29 @@ namespace WebApplication.Middleware
                 else
                 {
                     var t = Images.Pictures.FirstOrDefault(x => x.CategoryID != categoryId);
-                    if (t != null) 
+                    if (t != null)
                         t.DateOfLastReading = DateTime.Now;
                 }
 
+                var fileInf = new FileInfo($"{_ob.Pach}\\{categoryId}.png");
+                if (fileInf.Exists)
+                {
+                    ImagesSerialize();
+                    return;
+                }
+                   
+
                 using (var fileStream = new FileStream($"{_ob.Pach}\\{categoryId}.png",
-                    FileMode.OpenOrCreate))
+                FileMode.Create))
                 {
                     fileStream.Lock(0, fileStream.Length);
-                    file.CopyTo(fileStream);
-                    var array = new byte[fileStream.Length];
-
-                    fileStream.Write(array, 0, array.Length);
+                    memory.WriteTo(fileStream);
+                    byte[] array = new byte[fileStream.Length];
+                    fileStream.Read(array, 0, array.Length);
                 }
 
                 ImagesSerialize();
+                memory.Position = 0;
             });
         }
 
@@ -88,10 +115,10 @@ namespace WebApplication.Middleware
             await Task.Run(
                 () =>
                 {
-                    if (string.IsNullOrWhiteSpace(_ob.Pach) || !context.Request.Path.ToString().Contains("/Category/GetPicture") ||
-                        context.Request.Method != "GET")
+                    var route = context.Request.RouteValues;
+                    if (string.IsNullOrWhiteSpace(_ob.Pach) || route["controller"]?.ToString() != "Category" ||
+                        route["action"]?.ToString() != "GetImage") 
                         return;
-
                     var categoryId = SetCategoryIdForFile(context.Request.Path);
                     try
                     {

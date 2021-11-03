@@ -51,20 +51,7 @@ namespace WebApplication.Controllers
             {
                 return NotFound();
             }
-
-            if (HttpContext != null)
-            {
-                HttpContext.Items
-                    .TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey,
-                        out var middlewareSetValue);
-                if (!_memoryCache.TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey,
-                    out var value))
-                {
-                    _memoryCache.Set(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, middlewareSetValue,
-                        TimeSpan.FromSeconds(10));
-                }
-            }
-
+            
             var result = await _categoryService.GetСategoryAsync((int)id);
             return View(result);
         }
@@ -77,16 +64,15 @@ namespace WebApplication.Controllers
             {
                 return NotFound();
             }
-
-            if (_memoryCache != null)
-            {
-                _memoryCache.TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey, out var value);
-                if (value != null)
-                {
-                    return File((byte[])value, "image/png");
-                }
-            }
             
+            HttpContext.Items
+                .TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey,
+                    out var middlewareSetValue);
+            if (middlewareSetValue != null)
+            {
+                return File((byte[])middlewareSetValue, "image/png");
+            }
+
             var image = await _categoryService.GetСategoryImageAsync((int)id);
             return File(image, "image/png");
         }
