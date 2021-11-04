@@ -17,16 +17,18 @@ namespace WebApplication.Middleware
         private readonly ICacheFileProperties _ob;
         private readonly IWebHostEnvironment _env;
         private readonly XmlSerializer _xmlSerializer;
+        private readonly SemaphoreSlim _semaphoreSlim;
         public static readonly object HttpContextItemsCacheFileMiddlewareKey = new();
-        private Images Images { get; set; }
+        private FileSerialazation FileSerialazation { get; set; }
 
         public CacheFileMiddleware(RequestDelegate next, IWebHostEnvironment env, ICacheFileProperties ob)
         {
             _next = next;
             _env = env;
             _ob = ob;
-            _xmlSerializer = new XmlSerializer(typeof(Images));
-            Images = GetImagesDeserialize();
+            _xmlSerializer = new XmlSerializer(typeof(FileSerialazation));
+            _semaphoreSlim = new SemaphoreSlim(1);
+            FileSerialazation = GetImagesDeserialize();
             _ = DeleteOldFilesAsync();
         }
 
@@ -66,12 +68,12 @@ namespace WebApplication.Middleware
                     route["action"]?.ToString() != "GetImage")
                     return;
                 var categoryId = SetCategoryIdForFile(context.Request.Path);
-                if (Images.Pictures.Count >= _ob.MaxCount && Images.Pictures.All(x => x.CategoryID != categoryId))
+                if (FileSerialazation.Pictures.Count >= _ob.MaxCount && FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
                     return;
 
-                if (Images.Pictures.All(x => x.CategoryID != categoryId))
+                if (FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
                 {
-                    Images.Pictures.Add(new ImageClass()
+                    FileSerialazation.Pictures.Add(new DataSerialazation()
                     {
                         CategoryID = categoryId,
                         DateOfLastReading = DateTime.Now
@@ -79,7 +81,7 @@ namespace WebApplication.Middleware
                 }
                 else
                 {
-                    var t = Images.Pictures.FirstOrDefault(x => x.CategoryID != categoryId);
+                    var t = FileSerialazation.Pictures.FirstOrDefault(x => x.CategoryID != categoryId);
                     if (t != null)
                         t.DateOfLastReading = DateTime.Now;
                 }
@@ -122,8 +124,8 @@ namespace WebApplication.Middleware
                             FileMode.Open, FileAccess.Read))
                         {
                             fileStream.Lock(0, fileStream.Length);
-                            Images = GetImagesDeserialize();
-                            var image = Images.Pictures.FirstOrDefault(x => x.CategoryID == categoryId);
+                            FileSerialazation = GetImagesDeserialize();
+                            var image = FileSerialazation.Pictures.FirstOrDefault(x => x.CategoryID == categoryId);
                             image.DateOfLastReading = DateTime.Now;
                             byte[] array = new byte[fileStream.Length];
                             fileStream.Read(array, 0, array.Length);
@@ -137,30 +139,32 @@ namespace WebApplication.Middleware
                 });
         }
 
-        private Images GetImagesDeserialize()
+        private FileSerialazation GetImagesDeserialize()
         {
             var fileInf = new FileInfo($"{_ob.Pach}\\{SERIALIZATION_FILE_NAME}").Directory;
             if (fileInf is {Exists: false})
             {
-                return new Images();
+                return new FileSerialazation();
             }
             using (var fileStream = new FileStream($"{_ob.Pach}\\{SERIALIZATION_FILE_NAME}",
                 FileMode.OpenOrCreate, FileAccess.Read))
             {
                 fileStream.Lock(0, fileStream.Length);
-                var res = fileStream.Length == 0 ? new Images() : _xmlSerializer.Deserialize(fileStream) as Images;
+                var res = fileStream.Length == 0 ? new FileSerialazation() : _xmlSerializer.Deserialize(fileStream) as FileSerialazation;
                 return res;
             }
         }
-
+        
         private void ImagesSerialize()
         {
+            _semaphoreSlim.Wait();
             using (var fileStream = new FileStream($"{_ob.Pach}\\{SERIALIZATION_FILE_NAME}",
                 FileMode.Truncate))
             {
                 fileStream.Lock(0, fileStream.Length);
-                _xmlSerializer.Serialize(fileStream, Images);
+                _xmlSerializer.Serialize(fileStream, FileSerialazation);
             }
+            _semaphoreSlim.Release();
         }
 
         private string SetCategoryIdForFile(string path)
@@ -193,9 +197,9 @@ namespace WebApplication.Middleware
                             var fileInf = new FileInfo($"{_ob.Pach}\\{x.CategoryID}.png");
                             if (fileInf.Exists)
                                 fileInf.Delete();
-                            if (Images.Pictures.Contains(x))
+                            if (FileSerialazation.Pictures.Contains(x))
                             {
-                                Images.Pictures.Remove(x);
+                                FileSerialazation.Pictures.Remove(x);
                             }
                             isImagesSerialize = true;
                             return true;
