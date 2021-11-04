@@ -139,6 +139,11 @@ namespace WebApplication.Middleware
 
         private Images GetImagesDeserialize()
         {
+            var fileInf = new FileInfo($"{_ob.Pach}\\{SERIALIZATION_FILE_NAME}").Directory;
+            if (fileInf is {Exists: false})
+            {
+                return new Images();
+            }
             using (var fileStream = new FileStream($"{_ob.Pach}\\{SERIALIZATION_FILE_NAME}",
                 FileMode.OpenOrCreate, FileAccess.Read))
             {
@@ -175,7 +180,7 @@ namespace WebApplication.Middleware
             {
                 while (true)
                 {
-                    Thread.Sleep(100000);
+                    Thread.Sleep(10000);
                     token.ThrowIfCancellationRequested();
                     var images = GetImagesDeserialize();
                     var isImagesSerialize = false;

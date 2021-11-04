@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,6 +31,8 @@ namespace WebApplicationTests
             _memoryMock = new Mock<IMemoryCache>();
 
             _categoryController = new CategoryController(_logerMock.Object, _maperMock.Object, _serviceMock.Object, _memoryMock.Object);
+            _categoryController.ControllerContext = new ControllerContext();
+            _categoryController.ControllerContext.HttpContext = new DefaultHttpContext();
         }
 
         [TestMethod]
