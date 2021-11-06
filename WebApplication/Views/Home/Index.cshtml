@@ -4,5 +4,10 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome to my ASP.NET CORE application.</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <td>
+        @Html.ActionLink("Products", "GetProducts", "Product")
+    </td>
+    <td>
+        @Html.ActionLink("Categories", "GetCategories", "Category")
+    </td>
 </div>
