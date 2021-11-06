@@ -10,7 +10,6 @@ using WebApplication.ViewModels;
 
 namespace WebApplication.Controllers
 {
-    [ServiceFilter(typeof(LogingCallsActionFilter))]
     public class ProductController : Controller
     {
         private readonly ILogger<ProductController> _logger;

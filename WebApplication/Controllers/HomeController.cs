@@ -8,8 +8,7 @@ namespace WebApplication.Controllers
     using System.Diagnostics;
 
     using WebApplication.Models;
-
-    [ServiceFilter(typeof(LogingCallsActionFilter))]
+    
     public class HomeController : Controller
     {
         [ServiceFilter(typeof(LogingCallsActionFilter))]

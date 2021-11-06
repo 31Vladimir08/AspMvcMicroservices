@@ -18,8 +18,7 @@ namespace WebApplication.Controllers
     using System.Threading.Tasks;
 
     using WebApplication.Models;
-
-    [ServiceFilter(typeof(LogingCallsActionFilter))]
+    
     public class CategoryController : Controller
     {
         private readonly ILogger<CategoryController> _logger;
