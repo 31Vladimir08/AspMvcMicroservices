@@ -29,7 +29,7 @@ namespace WebApplication.Middleware
             _xmlSerializer = new XmlSerializer(typeof(FileSerialazation));
             _semaphoreSlim = new SemaphoreSlim(1);
             FileSerialazation = GetImagesDeserialize();
-            _ = DeleteOldFilesAsync();
+            DeleteOldFiles();
         }
 
         public async Task Invoke(HttpContext context)
@@ -178,9 +178,9 @@ namespace WebApplication.Middleware
             return new string(arr);
         }
 
-        private async Task DeleteOldFilesAsync(CancellationToken token = default)
-        {
-            await Task.Run(() =>
+        private void DeleteOldFiles(CancellationToken token = default)
+        { 
+            Task.Run(() =>
             {
                 while (true)
                 {

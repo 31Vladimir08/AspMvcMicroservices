@@ -10,7 +10,7 @@ namespace WebApplication.Extension
         public static IApplicationBuilder UseCacheFile(this IApplicationBuilder app, Action<ICacheFileProperties> param)
         {
             var ob = new CacheFileProperties();
-            param(ob);
+            param?.Invoke(ob);
             return app.UseMiddleware<CacheFileMiddleware>(ob);
         }
     }
