@@ -120,7 +120,7 @@ namespace WebApplication.Middleware
                     var categoryId = SetCategoryIdForFile(context.Request.Path);
                     try
                     {
-                        using (var fileStream = new FileStream($"{_env.ContentRootPath}/wwwroot/images/{categoryId}.png",
+                        using (var fileStream = new FileStream($"{_ob.Pach}/{categoryId}.png",
                             FileMode.Open, FileAccess.Read))
                         {
                             fileStream.Lock(0, fileStream.Length);
