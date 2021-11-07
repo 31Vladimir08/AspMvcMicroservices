@@ -61,82 +61,75 @@ namespace WebApplication.Middleware
 
         private async Task AddFileToCacheAsync(HttpContext context, MemoryStream memory)
         {
-            await Task.Run(() =>
+            var route = context.Request.RouteValues;
+            if (string.IsNullOrWhiteSpace(_ob.Pach) || route["controller"]?.ToString() != "Category" ||
+                route["action"]?.ToString() != "GetImage")
+                return;
+            var categoryId = await SetCategoryIdForFileAsync(context.Request.Path);
+            if (FileSerialazation.Pictures.Count >= _ob.MaxCount && FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
+                return;
+
+            if (FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
             {
-                var route = context.Request.RouteValues;
-                if (string.IsNullOrWhiteSpace(_ob.Pach) || route["controller"]?.ToString() != "Category" ||
-                    route["action"]?.ToString() != "GetImage")
-                    return;
-                var categoryId = SetCategoryIdForFile(context.Request.Path);
-                if (FileSerialazation.Pictures.Count >= _ob.MaxCount && FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
-                    return;
-
-                if (FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
+                FileSerialazation.Pictures.Add(new DataSerialazation()
                 {
-                    FileSerialazation.Pictures.Add(new DataSerialazation()
-                    {
-                        CategoryID = categoryId,
-                        DateOfLastReading = DateTime.Now
-                    });
-                }
-                else
-                {
-                    var t = FileSerialazation.Pictures.FirstOrDefault(x => x.CategoryID != categoryId);
-                    if (t != null)
-                        t.DateOfLastReading = DateTime.Now;
-                }
+                    CategoryID = categoryId,
+                    DateOfLastReading = DateTime.Now
+                });
+            }
+            else
+            {
+                var t = FileSerialazation.Pictures.FirstOrDefault(x => x.CategoryID != categoryId);
+                if (t != null)
+                    t.DateOfLastReading = DateTime.Now;
+            }
 
-                var fileInf = new FileInfo($"{_ob.Pach}\\{categoryId}.png");
-                if (fileInf.Exists)
-                {
-                    ImagesSerialize();
-                    return;
-                }
-                   
-
-                using (var fileStream = new FileStream($"{_ob.Pach}\\{categoryId}.png",
-                FileMode.Create))
-                {
-                    fileStream.Lock(0, fileStream.Length);
-                    memory.WriteTo(fileStream);
-                    byte[] array = new byte[fileStream.Length];
-                    fileStream.Read(array, 0, array.Length);
-                }
-
+            var fileInf = new FileInfo($"{_ob.Pach}\\{categoryId}.png");
+            if (fileInf.Exists)
+            {
                 ImagesSerialize();
-                memory.Position = 0;
-            });
+                return;
+            }
+
+
+            using (var fileStream = new FileStream($"{_ob.Pach}\\{categoryId}.png",
+                FileMode.Create))
+            {
+                fileStream.Lock(0, fileStream.Length);
+                memory.WriteTo(fileStream);
+                byte[] array = new byte[fileStream.Length];
+                await fileStream.ReadAsync(array, 0, array.Length);
+            }
+
+            ImagesSerialize();
+            memory.Position = 0;
         }
 
         private async Task GetFileFromCacheAsync(HttpContext context)
         {
-            await Task.Run(
-                () =>
+            var route = context.Request.RouteValues;
+            if (string.IsNullOrWhiteSpace(_ob.Pach) || route["controller"]?.ToString() != "Category" ||
+                route["action"]?.ToString() != "GetImage")
+                return;
+            var categoryId = await SetCategoryIdForFileAsync(context.Request.Path);
+            try
+            {
+                using (var fileStream = new FileStream($"{_ob.Pach}/{categoryId}.png",
+                    FileMode.Open, FileAccess.Read))
                 {
-                    var route = context.Request.RouteValues;
-                    if (string.IsNullOrWhiteSpace(_ob.Pach) || route["controller"]?.ToString() != "Category" ||
-                        route["action"]?.ToString() != "GetImage") 
-                        return;
-                    var categoryId = SetCategoryIdForFile(context.Request.Path);
-                    try
-                    {
-                        using (var fileStream = new FileStream($"{_ob.Pach}/{categoryId}.png",
-                            FileMode.Open, FileAccess.Read))
-                        {
-                            fileStream.Lock(0, fileStream.Length);
-                            FileSerialazation = GetImagesDeserialize();
-                            var image = FileSerialazation.Pictures.FirstOrDefault(x => x.CategoryID == categoryId);
-                            image.DateOfLastReading = DateTime.Now;
-                            byte[] array = new byte[fileStream.Length];
-                            fileStream.Read(array, 0, array.Length);
-                            context.Items[HttpContextItemsCacheFileMiddlewareKey] = array;
-                        }
-                    }
-                    catch (FileNotFoundException e)
-                    {
-                        //ignore
-                    }
-                });
+                    fileStream.Lock(0, fileStream.Length);
+                    FileSerialazation = GetImagesDeserialize();
+                    var image = FileSerialazation.Pictures.FirstOrDefault(x => x.CategoryID == categoryId);
+                    image.DateOfLastReading = DateTime.Now;
+                    byte[] array = new byte[fileStream.Length];
+                    await fileStream.ReadAsync(array, 0, array.Length);
+                    context.Items[HttpContextItemsCacheFileMiddlewareKey] = array;
+                }
+            }
+            catch (FileNotFoundException e)
+            {
+                //ignore
+            }
         }
 
         private FileSerialazation GetImagesDeserialize()
@@ -167,15 +160,19 @@ namespace WebApplication.Middleware
             _semaphoreSlim.Release();
         }
 
-        private string SetCategoryIdForFile(string path)
+        private async Task<string> SetCategoryIdForFileAsync(string path)
         {
-            char[] arr = path.ToCharArray();
-            Array.Reverse(arr);
-            string name = new string(arr);
-            name = name.Substring(0, name.IndexOf('/'));
-            arr = name.ToCharArray();
-            Array.Reverse(arr);
-            return new string(arr);
+            var res = await Task.Run(() =>
+            {
+                char[] arr = path.ToCharArray();
+                Array.Reverse(arr);
+                string name = new string(arr);
+                name = name.Substring(0, name.IndexOf('/'));
+                arr = name.ToCharArray();
+                Array.Reverse(arr);
+                return new string(arr);
+            });
+            return res;
         }
 
         private void DeleteOldFiles(CancellationToken token = default)

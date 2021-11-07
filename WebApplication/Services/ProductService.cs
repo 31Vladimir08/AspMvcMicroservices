@@ -28,62 +28,47 @@ namespace WebApplication.Services
 
         public async Task CreateProductAsync(Product product)
         {
-            await Task.Run(
-                () =>
-                {
-                    var db = _mapper.Map<ProductEntity>(product);
-                    try
-                    {
-                        _dbContext.Database.BeginTransaction();
-                        _dbContext.Set<ProductEntity>().Add(db);
-                        _dbContext.SaveChanges();
-                        _dbContext.Database.CommitTransaction();
-                    }
-                    catch (Exception ex)
-                    {
-                        _dbContext.Database.RollbackTransaction();
-                        throw;
-                    }
-                });
+            var db = _mapper.Map<ProductEntity>(product);
+            try
+            {
+                await _dbContext.Database.BeginTransactionAsync();
+                _dbContext.Set<ProductEntity>().Add(db);
+                await _dbContext.SaveChangesAsync();
+                await _dbContext.Database.CommitTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                await _dbContext.Database.RollbackTransactionAsync();
+                throw;
+            }
         }
 
         public async Task EditProductAsync(Product product)
         {
-            await Task.Run(
-                () =>
-                {
-                    var db = _mapper.Map<ProductEntity>(product);
-                    try
-                    {
-                        _dbContext.Database.BeginTransaction();
-                        _dbContext.Set<ProductEntity>().Update(db);
-                        _dbContext.SaveChanges();
-                        _dbContext.Database.CommitTransaction();
-                    }
-                    catch (Exception ex)
-                    {
-                        _dbContext.Database.RollbackTransaction();
-                        throw;
-                    }
-                });
+            var db = _mapper.Map<ProductEntity>(product);
+            try
+            {
+                await _dbContext.Database.BeginTransactionAsync();
+                _dbContext.Set<ProductEntity>().Update(db);
+                await _dbContext.SaveChangesAsync();
+                await _dbContext.Database.CommitTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                await _dbContext.Database.RollbackTransactionAsync();
+                throw;
+            }
         }
 
         public async Task<Product> GetProductAsync(int id)
         {
-            var res = await Task.Run(() =>
-            {
-                var result = _dbContext.Set<ProductEntity>().FirstOrDefault(x => x.ProductID == id);
-                return _mapper.Map<Product>(result);
-            });
-            return res;
+            var result = await _dbContext.Set<ProductEntity>().FirstOrDefaultAsync(x => x.ProductID == id);
+            return _mapper.Map<Product>(result);
         }
 
         public async Task<IEnumerable<ProductUI>> GetProductsAsync()
         {
-            var res = await Task.Run(
-                () =>
-                {
-                    var query = _dbContext.Set<ProductEntity>()
+            var query = _dbContext.Set<ProductEntity>()
                         .Join(_dbContext.Set<SupplierEntity>(),
                             p => p.SupplierID,
                             c => c.SupplierID,
@@ -120,35 +105,25 @@ namespace WebApplication.Services
                                 Discontinued = p.Discontinued
                             });
 
-                    if (_options.MaxCountElements > 0)
-                    {
-                        query = query.Take(_options.MaxCountElements);
-                    }
+            if (_options.MaxCountElements > 0)
+            {
+                query = query.Take(_options.MaxCountElements);
+            }
 
-                    var result = query.AsNoTracking().ToList();
-                    return result;
-                });
-            return res;
+            var result = await query.AsNoTracking().ToListAsync();
+            return result;
         }
 
         public async Task<IEnumerable<Supplier>> GetSuppliersAsync()
         {
-            var res = await Task.Run(() =>
-            {
-                var result = _dbContext.Set<SupplierEntity>().AsNoTracking().ToList();
-                return _mapper.Map<IEnumerable<Supplier>>(result);
-            });
-            return res;
+            var result = await _dbContext.Set<SupplierEntity>().AsNoTracking().ToListAsync();
+            return _mapper.Map<IEnumerable<Supplier>>(result);
         }
 
         public async Task<IEnumerable<Сategory>> GetСategoriesAsync()
         {
-            var res = await Task.Run(() =>
-            {
-                var result = _dbContext.Set<СategoryEntity>().AsNoTracking().ToList();
-                return _mapper.Map<IEnumerable<Сategory>>(result);
-            });
-            return res;
+            var result = await _dbContext.Set<СategoryEntity>().AsNoTracking().ToListAsync();
+            return _mapper.Map<IEnumerable<Сategory>>(result);
         }
     }
 }
