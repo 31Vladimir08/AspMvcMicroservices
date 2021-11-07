@@ -63,9 +63,29 @@ namespace WebApplication.Middleware
         {
             var route = context.Request.RouteValues;
             if (string.IsNullOrWhiteSpace(_ob.Pach) || route["controller"]?.ToString() != "Category" ||
-                route["action"]?.ToString() != "GetImage")
+                (route["action"]?.ToString() != "GetImage" && route["action"]?.ToString() != "GetPicture"))
                 return;
+
             var categoryId = await SetCategoryIdForFileAsync(context.Request.Path);
+
+            if (route["action"]?.ToString() == "GetPicture")
+            {
+                var file = FileSerialazation.Pictures.FirstOrDefault(
+                    x =>
+                    {
+                        if (x.CategoryID != categoryId) 
+                            return false;
+                        var fileInf = new FileInfo($"{_ob.Pach}\\{x.CategoryID}.png");
+                        if (fileInf.Exists)
+                            fileInf.Delete();
+                        return true;
+
+                    });
+                FileSerialazation.Pictures.Remove(file);
+                ImagesSerialize();
+                return;
+            }
+            
             if (FileSerialazation.Pictures.Count >= _ob.MaxCount && FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
                 return;
 
