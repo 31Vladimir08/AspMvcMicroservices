@@ -47,13 +47,17 @@
     <footer class="border-top footer text-muted">
         <div class="container">
             @{
-                if (Convert.ToString(Context.Request.HttpContext.Request.RouteValues["Controller"]) == "Category")
+                if (IsSectionDefined("Footer"))
                 {
-                    <p>2021 - WebApplication. Warning: Categories can't' be edited</p>
+                    @RenderSection("Footer")
+                }
+                else if (Convert.ToString(Context.Request.HttpContext.Request.RouteValues["Controller"]) == "Category")
+                {
+                    <footer>2021 - WebApplication. Warning: Categories can't' be edited</footer>
                 }
                 else
                 {
-                    <p>2021 - WebApplication</p>
+                    <footer>2021 - WebApplication</footer>
                 }
             }
         </div>
