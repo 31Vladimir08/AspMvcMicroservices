@@ -18,8 +18,7 @@ namespace WebApplication.Controllers
     using System.Threading.Tasks;
 
     using WebApplication.Models;
-
-    [ServiceFilter(typeof(LogingCallsActionFilter))]
+    
     public class CategoryController : Controller
     {
         private readonly ILogger<CategoryController> _logger;
@@ -94,29 +93,24 @@ namespace WebApplication.Controllers
 
         private async Task<Сategory> SavePictureAsync(Сategory category, IFormFile uploadedFile)
         {
-            var result = await Task.Run(
-                () =>
+            if (category == null)
+                return null;
+            using (var memoryStream = new MemoryStream())
+            {
+                await uploadedFile?.CopyToAsync(memoryStream);
+
+                // Upload the file if less than 2 MB
+                if (memoryStream.Length < 2097152)
                 {
-                    if (category == null)
-                        return null;
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        uploadedFile?.CopyTo(memoryStream);
+                    category.Picture = memoryStream.ToArray();
+                }
+                else
+                {
+                    ModelState.AddModelError("File", "The file is too large.");
+                }
+            }
 
-                        // Upload the file if less than 2 MB
-                        if (memoryStream.Length < 2097152)
-                        {
-                            category.Picture = memoryStream.ToArray();
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("File", "The file is too large.");
-                        }
-                    }
-
-                    return category;
-                });
-            return result;
+            return category;
         }
     }
 }
