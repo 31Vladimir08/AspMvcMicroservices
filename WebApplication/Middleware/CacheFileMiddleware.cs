@@ -66,7 +66,7 @@ namespace WebApplication.Middleware
                 (route["action"]?.ToString() != "GetImage" && route["action"]?.ToString() != "GetPicture"))
                 return;
 
-            var categoryId = await SetCategoryIdForFileAsync(context.Request.Path);
+            var categoryId = SetCategoryIdForFile(context.Request.Path);
 
             if (route["action"]?.ToString() == "GetPicture")
             {
@@ -131,7 +131,7 @@ namespace WebApplication.Middleware
             if (string.IsNullOrWhiteSpace(_ob.Pach) || route["controller"]?.ToString() != "Category" ||
                 route["action"]?.ToString() != "GetImage")
                 return;
-            var categoryId = await SetCategoryIdForFileAsync(context.Request.Path);
+            var categoryId = SetCategoryIdForFile(context.Request.Path);
             try
             {
                 using (var fileStream = new FileStream($"{_ob.Pach}/{categoryId}.png",
@@ -180,19 +180,15 @@ namespace WebApplication.Middleware
             _semaphoreSlim.Release();
         }
 
-        private async Task<string> SetCategoryIdForFileAsync(string path)
+        private string SetCategoryIdForFile(string path)
         {
-            var res = await Task.Run(() =>
-            {
-                char[] arr = path.ToCharArray();
-                Array.Reverse(arr);
-                string name = new string(arr);
-                name = name.Substring(0, name.IndexOf('/'));
-                arr = name.ToCharArray();
-                Array.Reverse(arr);
-                return new string(arr);
-            });
-            return res;
+            char[] arr = path.ToCharArray();
+            Array.Reverse(arr);
+            string name = new string(arr);
+            name = name.Substring(0, name.IndexOf('/'));
+            arr = name.ToCharArray();
+            Array.Reverse(arr);
+            return new string(arr);
         }
 
         private void DeleteOldFiles(CancellationToken token = default)
