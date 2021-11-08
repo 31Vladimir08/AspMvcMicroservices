@@ -27,68 +27,53 @@ namespace WebApplication.Services
 
         public async Task EditСategoryAsync(Сategory product)
         {
-            await Task.Run(() =>
+            try
             {
-                try
-                {
-                    var category = _mapper.Map<СategoryEntity>(product);
-                    _dbContext.Database.BeginTransaction();
-                    _dbContext.Set<СategoryEntity>().Update(category);
+                var category = _mapper.Map<СategoryEntity>(product);
+                await _dbContext.Database.BeginTransactionAsync();
+                _dbContext.Set<СategoryEntity>().Update(category);
 
-                    _dbContext.SaveChanges();
-                    _dbContext.Database.CommitTransaction();
-                }
-                catch (Exception ex)
-                {
-                    _dbContext.Database.RollbackTransaction();
-                    throw;
-                }
-            });
+                await _dbContext.SaveChangesAsync();
+                await _dbContext.Database.CommitTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                await _dbContext.Database.RollbackTransactionAsync();
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Сategory>> GetCategoriesAsync()
         {
-            var res = await Task.Run(() =>
-            {
-                var db = _dbContext.Set<СategoryEntity>().AsNoTracking().ToList();
-                var result = _mapper.Map<IEnumerable<Сategory>>(db);
-                return result;
-            });
-            return res;
+            var db = await _dbContext.Set<СategoryEntity>().AsNoTracking().ToListAsync();
+            var result = _mapper.Map<IEnumerable<Сategory>>(db);
+            return result;
         }
 
         public async Task<Сategory> GetСategoryAsync(int id)
         {
-            var res = await Task.Run(() =>
-            {
-                var res = _dbContext.Set<СategoryEntity>()
-                    .AsNoTracking()
-                    .Where(x => x.CategoryID == id)
-                    .Select(x => new СategoryEntity
-                    {
-                        CategoryID = x.CategoryID,
-                        CategoryName = x.CategoryName,
-                        Description = x.Description,
-                        Products = x.Products
-                    })
-                    .FirstOrDefault();
-                return _mapper.Map<Сategory>(res);
-            });
-            return res;
+            var res = await _dbContext.Set<СategoryEntity>()
+                .AsNoTracking()
+                .Where(x => x.CategoryID == id)
+                .Select(x => new СategoryEntity
+                {
+                    CategoryID = x.CategoryID,
+                    CategoryName = x.CategoryName,
+                    Description = x.Description,
+                    Products = x.Products
+                })
+                .FirstOrDefaultAsync();
+            return _mapper.Map<Сategory>(res);
         }
 
         public async Task<byte[]> GetСategoryImageAsync(int id)
         {
-            var result = await Task.Run(() =>
-            {
-                var res = _dbContext.Set<СategoryEntity>()
-                    .AsNoTracking()
-                    .Where(x => x.CategoryID == id)
-                    .Select(x => x.Picture)
-                    .FirstOrDefault();
-                return res;
-            });
-            return result;
+            var res = await _dbContext.Set<СategoryEntity>()
+                .AsNoTracking()
+                .Where(x => x.CategoryID == id)
+                .Select(x => x.Picture)
+                .FirstOrDefaultAsync();
+            return res;
         }
     }
 }
