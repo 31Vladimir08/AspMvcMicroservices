@@ -1,4 +1,9 @@
-using Microsoft.Extensions.Options;
+using System;
+using System.IO;
+using WebApplication.Extension;
+using WebApplication.Filters;
+using WebApplication.Interfaces;
+using WebApplication.Services;
 
 namespace WebApplication
 {
@@ -7,11 +12,8 @@ namespace WebApplication
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
     using WebApplication.Models;
-    using Autofac;
-    using Autofac.Extensions.DependencyInjection;
 
     using DataAccessLayer;
-    using DataAccessLayer.Interfaces;
 
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -20,6 +22,7 @@ namespace WebApplication
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using AutoMapperProfile;
+    using DataAccessLayer.Interfaces;
 
     public class Startup
     {
@@ -35,14 +38,18 @@ namespace WebApplication
         {
             Options = Configuration.GetSection(DbSettings.DbSettingsKey)
                 .Get<DbSettings>();
-            services.Configure<DbSettings>(Configuration.GetSection("DbSettings"));
+            services.AddMemoryCache();
+            services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
                 });
             services.AddAutoMapper(typeof(AutoMapProfiler), typeof(Startup));
-            services.AddAutofac();
             services.AddControllersWithViews();
+            services.AddScoped<IAplicationDbContext, AplicationDbContext>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<LogingCallsActionFilter>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -84,17 +91,24 @@ namespace WebApplication
 
             app.UseAuthorization();
 
+            app.UseCacheFile(x =>
+            {
+                x.SetParam(
+                    Path.Combine(env.ContentRootPath, "wwwroot\\images"),
+                    cacheExpirationTime: TimeSpan.FromMinutes(1));
+            });
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
-        }
+                    name: "images",
+                    pattern: "images/{id?}",
+                    defaults: new { controller = "Category", action = "GetPicture" });
 
-        public void ConfigureContainer(ContainerBuilder bilder)
-        {
-            bilder.RegisterType<AplicationDbContext>().As<IAplicationDbContext>();
+                endpoints.MapControllerRoute(
+                        name: "default",
+                        pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
         }
     }
 }
