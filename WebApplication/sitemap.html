@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mvcSiteMap xmlns="http://mvcsitemap.codeplex.com/schemas/MvcSiteMap-File-3.0" enableLocalization="true">
+    <mvcSiteMapNode title="Home" controller="Home" action="Index">
+        <mvcSiteMapNode title="Product" controller="Product" action="GetProducts">
+            <mvcSiteMapNode title="Create New" controller="Product" action="CreateProduct" />
+            <mvcSiteMapNode title="Edit" controller="Product" action="EditProduct" />
+        </mvcSiteMapNode>
+        <mvcSiteMapNode title="Category" controller="Category" action="GetCategories">
+            <mvcSiteMapNode title="Edit picture" controller="Category" action="GetPicture" />
+        </mvcSiteMapNode>
+    </mvcSiteMapNode>
+</mvcSiteMap>
