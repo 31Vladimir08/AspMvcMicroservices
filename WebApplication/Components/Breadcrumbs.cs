@@ -11,9 +11,8 @@ namespace WebApplication.Components
     {
         public IViewComponentResult Invoke()
         {
-            var res = new SitemapElementViewModel();
-            res.SitemapElements = GetBreadcrumbs();
-            return View(res);
+            var res = GetBreadcrumbs();
+            return View(res ?? new List<SitemapElement>());
         }
 
         private IEnumerable<SitemapElement> GetBreadcrumbs()
