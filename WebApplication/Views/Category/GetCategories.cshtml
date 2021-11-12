@@ -3,12 +3,10 @@
 @{
     ViewData["Title"] = "View";
 }
+@using WebApplication.TagHelpers
 
 <h1>Categories</h1>
 
-@*<p>
-    <a asp-action="Create">Create New</a>
-</p>*@
 <table class="table">
     <thead>
         <tr>
@@ -22,21 +20,22 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        @Html.HiddenFor(m => item.CategoryID)
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CategoryName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.ActionLink("Picture", "GetPicture", new {  id=item.CategoryID  }) |
-                @*@Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })*@
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            @Html.HiddenFor(m => item.CategoryID)
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CategoryName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.ActionLink("Picture", "GetPicture", new { id = item.CategoryID }) |
+                    @Html.NorthwindImageLink(item.CategoryID, $"Link text from Html Helper {item.CategoryID}") |
+                    <northwind image-id="item.CategoryID">Link text from Html Tag @item.CategoryID</northwind>
+</td>
+            </tr>
+        }
     </tbody>
 </table>
