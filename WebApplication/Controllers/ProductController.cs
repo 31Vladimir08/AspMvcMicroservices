@@ -28,7 +28,7 @@ namespace WebApplication.Controllers
         [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<IActionResult> GetProducts()
         {
-            var result = await _productService.GetProductsAsync();
+            var result = await _productService.GetProductsUiAsync();
 
             return View(result);
         }

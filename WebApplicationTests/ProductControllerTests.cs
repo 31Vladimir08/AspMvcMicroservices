@@ -33,7 +33,7 @@ namespace WebApplicationTests
         [TestMethod]
         public async Task GetProductsTest()
         {
-            _serviceMock.Setup(x => x.GetProductsAsync());
+            _serviceMock.Setup(x => x.GetProductsUiAsync());
             await _productController.GetProducts();
             _serviceMock.VerifyAll();
         }
