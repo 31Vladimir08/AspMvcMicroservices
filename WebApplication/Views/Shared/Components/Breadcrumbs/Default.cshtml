@@ -1,0 +1,20 @@
+﻿@model IEnumerable<WebApplication.Models.SitemapElement>
+
+@{
+    ViewData["Title"] = "View";
+}
+
+@foreach (var item in Model) {
+    if (item.ParentLevel != 0)
+    {
+        <td>
+            @Html.ActionLink(item.Title + ">", item.ActionName, item.ControllerName)
+        </td>
+    }
+    else
+    {
+        <td>
+            @Html.ActionLink(item.Title, item.ActionName, item.ControllerName)
+        </td>
+    }
+}
