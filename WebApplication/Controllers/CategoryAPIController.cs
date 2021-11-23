@@ -62,13 +62,21 @@ namespace WebApplication.Controllers
             HttpContext.Items
                 .TryGetValue(CacheFileMiddleware.HttpContextItemsCacheFileMiddlewareKey,
                     out var middlewareSetValue);
-            if (middlewareSetValue != null)
+            try
             {
-                return File((byte[])middlewareSetValue, "image/png");
-            }
+                if (middlewareSetValue != null)
+                {
+                    return File((byte[])middlewareSetValue, "image/png");
+                }
 
-            var image = await _categoryService.GetСategoryImageAsync((int)id);
-            return File(image, "image/png");
+                var image = await _categoryService.GetСategoryImageAsync((int)id);
+                return File(image, "image/png");
+            }
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
+            
         }
 
         [HttpPost("{id:long}")]
@@ -80,10 +88,17 @@ namespace WebApplication.Controllers
                 return NotFound();
             }
 
-            var category = await _categoryService.GetСategoryAsync((int)id);
-            await SavePictureAsync(category, uploadedFile);
-            await _categoryService.EditСategoryAsync(category);
-            return Ok();
+            try
+            {
+                var category = await _categoryService.GetСategoryAsync((int)id);
+                await SavePictureAsync(category, uploadedFile);
+                await _categoryService.EditСategoryAsync(category);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest();
+            }
         }
 
         private async Task<Сategory> SavePictureAsync(Сategory category, IFormFile uploadedFile)

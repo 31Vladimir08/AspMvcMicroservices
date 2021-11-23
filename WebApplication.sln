@@ -11,7 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplicationTests", "WebA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication.Integration.Tests", "WebApplication.Integration.Tests\WebApplication.Integration.Tests.csproj", "{A2B4C26F-66F2-4B9B-AF02-B5120C3593E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{82CE3D52-243D-4F6E-A2EC-8A6A006C9F50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{82CE3D52-243D-4F6E-A2EC-8A6A006C9F50}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HTMLSimpleClient", "HTMLSimpleClient", "{31C62F29-E43A-41BD-BD88-18BF4B456BC1}"
+	ProjectSection(SolutionItems) = preProject
+		HTMLPage.html = HTMLPage.html
+		Script.js = Script.js
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

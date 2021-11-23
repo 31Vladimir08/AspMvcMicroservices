@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
 using WebApplication.Filters;
 using WebApplication.Interfaces;
 using WebApplication.Models;
@@ -43,17 +45,25 @@ namespace WebApplication.Controllers
             }
         }
 
+        //[HttpGet]
+        //[ServiceFilter(typeof(LogingCallsActionFilter))]
+        //public async Task<IEnumerable<Product>> GetProducts()
+        //{
+        //    var result = await _productService.GetProductsAsync();
+        //    return result;
+        //}
+
         [HttpPost]
         [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<IActionResult> AddProduct([FromBody] Product product)
         {
+            if (!ModelState.IsValid)
+            {
+                return Ok();
+            }
+
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return Ok();
-                }
-
                 await _productService.CreateProductAsync(product);
                 return Ok();
             }
@@ -61,20 +71,20 @@ namespace WebApplication.Controllers
             {
                 return BadRequest();
             }
-            
         }
 
         [HttpGet("{id:long}")]
         [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<IActionResult> GetProduct(long? id)
         {
+            
+            if (id is null or 0)
+            {
+                return NotFound();
+            }
+
             try
             {
-                if (id is null or 0)
-                {
-                    return NotFound();
-                }
-
                 var prodDto = await _productService.GetProductAsync((int)id);
 
                 return Ok(prodDto);
@@ -83,20 +93,19 @@ namespace WebApplication.Controllers
             {
                 return BadRequest();
             }
-
         }
 
         [HttpPut]
         [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<IActionResult> EditProduct([FromBody] Product product)
         {
+            if (!ModelState.IsValid)
+            {
+                return NotFound();
+            }
+
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return NotFound();
-                }
-
                 await _productService.EditProductAsync(product);
                 return Ok();
             }
@@ -104,20 +113,19 @@ namespace WebApplication.Controllers
             {
                 return BadRequest();
             }
-            
         }
 
         [HttpDelete]
         [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<IActionResult> DeleteProduct([FromBody] Product product)
         {
+            if (!ModelState.IsValid)
+            {
+                return NotFound();
+            }
+
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return NotFound();
-                }
-
                 await _productService.DeleteProductAsync(product);
                 return Ok();
             }
@@ -125,7 +133,6 @@ namespace WebApplication.Controllers
             {
                 return BadRequest();
             }
-
         }
     }
 }
