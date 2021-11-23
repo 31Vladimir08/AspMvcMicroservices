@@ -4,9 +4,7 @@
     <title>HTMLSimpleClient</title>
 </head>
 <body>
-
     <div class="container-fluid">
-        <h2>All Products</h2>
         <table id="apiTableProducts" class="table table-sm table-striped table-bordered m-2" style="display: inline-block;">
             <thead><tr><th>Product ID</th><th>Product name</th><th></thead>
             <tbody></tbody>
@@ -16,43 +14,6 @@
             <tbody></tbody>
         </table>
     </div>
-
-<script type="text/javascript">
-    ShowAllProducts();
-    ShowAllCategories();
-
-    function ShowAllProducts() {
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "https://localhost:44359/api/ProductApi", true);
-        xhttp.send();
-
-        xhttp.onreadystatechange = function () {
-            var tbody = document.getElementById("apiTableProducts").querySelector("tbody");
-            tbody.innerHTML = "";
-            if (this.readyState == 4 && this.status == 200) {
-                JSON.parse(this.responseText).forEach(function (data, index) {
-                    tbody.innerHTML += "<tr><td>" + data.productID + "</td>" + "<td>" + data.productName + "</td></tr>";
-                });
-            }
-        };
-    }
-
-    function ShowAllCategories() {
-        var xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "https://localhost:44359/api/CategoryApi", true);
-        xhttp.send();
-
-        xhttp.onreadystatechange = function () {
-            var tbody = document.getElementById("apiTableCategories").querySelector("tbody");
-            tbody.innerHTML = "";
-            if (this.readyState == 4 && this.status == 200) {
-                JSON.parse(this.responseText).forEach(function (data, index) {
-                    tbody.innerHTML += "<tr><td>" + data.categoryID + "</td>" + "<td>" + data.categoryName + "</td></tr>";
-                });
-            }
-        };
-    }
-
-</script>
+    <script src="Script.js"></script>
 </body>
 </html>
