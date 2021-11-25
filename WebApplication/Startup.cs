@@ -4,26 +4,25 @@ using WebApplication.Extension;
 using WebApplication.Filters;
 using WebApplication.Interfaces;
 using WebApplication.Services;
+using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using WebApplication.Models;
+
+using DataAccessLayer;
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using WebApplication.AutoMapperProfile;
+using DataAccessLayer.Interfaces;
 
 namespace WebApplication
 {
-    using System.Net;
-    using Microsoft.AspNetCore.Diagnostics;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Logging;
-    using Models;
-
-    using DataAccessLayer;
-
-    using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
-    using AutoMapperProfile;
-    using DataAccessLayer.Interfaces;
-
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -64,7 +63,7 @@ namespace WebApplication
                     {
                         Name = "Vladimir Dolidze",
                         Email = string.Empty,
-                        //Url = "https://twitter.com/spboyer"
+                        Url = "https://vk.com/id52435997"
                     };
                     document.Info.License = new NSwag.OpenApiLicense
                     {
