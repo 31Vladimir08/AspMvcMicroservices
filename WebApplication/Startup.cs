@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Microsoft.OpenApi.Models;
 using WebApplication.Extension;
 using WebApplication.Filters;
 using WebApplication.Interfaces;
@@ -12,7 +11,7 @@ namespace WebApplication
     using Microsoft.AspNetCore.Diagnostics;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
-    using WebApplication.Models;
+    using Models;
 
     using DataAccessLayer;
 
@@ -24,7 +23,6 @@ namespace WebApplication
     using Microsoft.Extensions.Hosting;
     using AutoMapperProfile;
     using DataAccessLayer.Interfaces;
-    using Swashbuckle.Swagger;
 
     public class Startup
     {
@@ -53,27 +51,8 @@ namespace WebApplication
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<LogingCallsActionFilter>();
 
-            // Inject an implementation of ISwaggerProvider with defaulted settings applied
-            services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "ToDo API",
-                    Description = "An ASP.NET Core Web API for managing ToDo items",
-                    TermsOfService = new Uri("https://example.com/terms"),
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Example Contact",
-                        Url = new Uri("https://example.com/contact")
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = "Example License",
-                        Url = new Uri("https://example.com/license")
-                    }
-                });
-            });
+            // Register the Swagger services
+            services.AddSwaggerDocument();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -84,15 +63,11 @@ namespace WebApplication
             {
                 app.UseDeveloperExceptionPage();
 
-                // Enable middleware to serve generated Swagger as a JSON endpoint
+                //Enable middleware to serve generated Swagger as a JSON endpoint
                 app.UseSwagger();
 
-                // Enable middleware to serve swagger-ui assets (HTML, JS, CSS etc.)
-                app.UseSwaggerUI(options =>
-                {
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-                    options.RoutePrefix = string.Empty;
-                });
+                //Enable middleware to serve swagger - ui assets(HTML, JS, CSS etc.)
+                app.UseSwaggerUi3();
             }
             else
             {
