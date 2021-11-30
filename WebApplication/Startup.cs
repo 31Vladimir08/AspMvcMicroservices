@@ -20,6 +20,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WebApplication.AutoMapperProfile;
 using DataAccessLayer.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using WebApplication.Data;
 
 namespace WebApplication
 {
@@ -50,6 +52,11 @@ namespace WebApplication
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<LogingCallsActionFilter>();
 
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
             // Register the Swagger services
             services.AddSwaggerDocument(config =>
             {
@@ -132,7 +139,8 @@ namespace WebApplication
                     Path.Combine(env.ContentRootPath, "wwwroot\\images"),
                     cacheExpirationTime: TimeSpan.FromMinutes(1));
             });
-            
+            app.UseAuthentication();    // аутентификация
+            app.UseAuthorization();     // авторизация
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
