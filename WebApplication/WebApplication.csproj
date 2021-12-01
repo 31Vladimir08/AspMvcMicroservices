@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Identity\" />
     <Folder Include="Logs\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
