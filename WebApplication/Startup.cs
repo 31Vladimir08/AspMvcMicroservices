@@ -57,6 +57,7 @@ namespace WebApplication
 
             services.AddRazorPages();
             services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddDefaultUI()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             // Register the Swagger services
             services.AddSwaggerDocument(config =>
