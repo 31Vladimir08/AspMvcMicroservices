@@ -43,6 +43,23 @@ namespace WebApplication.Services
             }
         }
 
+        public async Task DeleteProductAsync(Product product)
+        {
+            var db = _mapper.Map<ProductEntity>(product);
+            try
+            {
+                await _dbContext.Database.BeginTransactionAsync();
+                _dbContext.Set<ProductEntity>().Remove(db);
+                await _dbContext.SaveChangesAsync();
+                await _dbContext.Database.CommitTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                await _dbContext.Database.RollbackTransactionAsync();
+                throw;
+            }
+        }
+
         public async Task EditProductAsync(Product product)
         {
             var db = _mapper.Map<ProductEntity>(product);
@@ -66,7 +83,21 @@ namespace WebApplication.Services
             return _mapper.Map<Product>(result);
         }
 
-        public async Task<IEnumerable<ProductUI>> GetProductsAsync()
+        public async Task<IEnumerable<Product>> GetProductsAsync()
+        {
+            var query = _dbContext.Set<ProductEntity>().AsQueryable();
+
+            if (_options.MaxCountElements > 0)
+            {
+                query = query.Take(_options.MaxCountElements);
+            }
+
+            var result = await query.AsNoTracking().ToListAsync();
+            var res = _mapper.Map<IEnumerable<Product>>(result);
+            return res;
+        }
+
+        public async Task<IEnumerable<ProductUI>> GetProductsUiAsync()
         {
             var query = _dbContext.Set<ProductEntity>()
                         .Join(_dbContext.Set<SupplierEntity>(),

@@ -25,6 +25,24 @@ namespace WebApplication.Services
             _options = options.Value;
         }
 
+        public async Task DeleteСategoryAsync(Сategory product)
+        {
+            try
+            {
+                var category = _mapper.Map<СategoryEntity>(product);
+                await _dbContext.Database.BeginTransactionAsync();
+                _dbContext.Set<СategoryEntity>().Remove(category);
+
+                await _dbContext.SaveChangesAsync();
+                await _dbContext.Database.CommitTransactionAsync();
+            }
+            catch (Exception ex)
+            {
+                await _dbContext.Database.RollbackTransactionAsync();
+                throw;
+            }
+        }
+
         public async Task EditСategoryAsync(Сategory product)
         {
             try
@@ -48,6 +66,14 @@ namespace WebApplication.Services
             var db = await _dbContext.Set<СategoryEntity>().AsNoTracking().ToListAsync();
             var result = _mapper.Map<IEnumerable<Сategory>>(db);
             return result;
+        }
+
+        public async Task<Сategory> GetСategoryAllAsync(int id)
+        {
+            var res = await _dbContext.Set<СategoryEntity>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.CategoryID == id);
+            return _mapper.Map<Сategory>(res);
         }
 
         public async Task<Сategory> GetСategoryAsync(int id)

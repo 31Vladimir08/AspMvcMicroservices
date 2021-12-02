@@ -7,11 +7,13 @@ namespace WebApplication.Interfaces
 {
     public interface IProductService
     {
-        Task<IEnumerable<ProductUI>> GetProductsAsync();
+        Task<IEnumerable<ProductUI>> GetProductsUiAsync();
+        Task<IEnumerable<Product>> GetProductsAsync();
         Task<Product> GetProductAsync(int id);
         Task<IEnumerable<Supplier>> GetSuppliersAsync();
         Task<IEnumerable<Сategory>> GetСategoriesAsync();
         Task CreateProductAsync(Product product);
         Task EditProductAsync(Product product);
+        Task DeleteProductAsync(Product product);
     }
 }

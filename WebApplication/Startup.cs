@@ -4,26 +4,25 @@ using WebApplication.Extension;
 using WebApplication.Filters;
 using WebApplication.Interfaces;
 using WebApplication.Services;
+using System.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using WebApplication.Models;
+
+using DataAccessLayer;
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using WebApplication.AutoMapperProfile;
+using DataAccessLayer.Interfaces;
 
 namespace WebApplication
 {
-    using System.Net;
-    using Microsoft.AspNetCore.Diagnostics;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Logging;
-    using WebApplication.Models;
-
-    using DataAccessLayer;
-
-    using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
-    using AutoMapperProfile;
-    using DataAccessLayer.Interfaces;
-
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -50,6 +49,29 @@ namespace WebApplication
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<LogingCallsActionFilter>();
+
+            // Register the Swagger services
+            services.AddSwaggerDocument(config =>
+            {
+                config.PostProcess = document =>
+                {
+                    document.Info.Version = "v1";
+                    document.Info.Title = "ToDo API";
+                    document.Info.Description = "A simple ASP.NET Core web API";
+                    document.Info.TermsOfService = "None";
+                    document.Info.Contact = new NSwag.OpenApiContact
+                    {
+                        Name = "Vladimir Dolidze",
+                        Email = string.Empty,
+                        Url = "https://vk.com/id52435997"
+                    };
+                    document.Info.License = new NSwag.OpenApiLicense
+                    {
+                        Name = "Use under LICX",
+                        Url = "https://example.com/license"
+                    };
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -59,6 +81,12 @@ namespace WebApplication
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                //Enable middleware to serve generated Swagger as a JSON endpoint
+                app.UseSwagger();
+
+                //Enable middleware to serve swagger - ui assets(HTML, JS, CSS etc.)
+                app.UseSwaggerUi3();
             }
             else
             {
@@ -88,6 +116,13 @@ namespace WebApplication
             app.UseStaticFiles();
 
             app.UseRouting();
+            
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                .AllowCredentials()); // allow credentials
 
             app.UseAuthorization();
 
