@@ -45,16 +45,16 @@ namespace WebApplication
                 { 
                     options.UseSqlServer(Options.ConnectionString);
                 });
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Options.IdentityConnectionString));
+
             services.AddAutoMapper(typeof(AutoMapProfiler), typeof(Startup));
             services.AddControllersWithViews();
             services.AddScoped<IAplicationDbContext, AplicationDbContext>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<LogingCallsActionFilter>();
-
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
+            
             services.AddRazorPages();
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddDefaultUI()
