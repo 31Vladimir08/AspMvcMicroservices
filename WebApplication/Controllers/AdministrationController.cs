@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication.Controllers
 {
-    [Authorize(Roles = "Administrator")]
+    [Authorize(Roles = nameof(RoleEnum.Administrator))]
     public class AdministrationController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;
