@@ -62,10 +62,10 @@
                                 Categories
                             </a>
                         </li>
-                        @if (false)
+                        @if (User.IsInRole(nameof(RoleEnum.Administrator)))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark bi bi-list" width="50" height="50" asp-area="" asp-controller="Administration" asp-action="Users">
+                                <a class="nav-link text-dark bi bi-person-square" width="50" height="50" asp-area="" asp-controller="Administration" asp-action="Users">
                                     Administration
                                 </a>
                             </li>

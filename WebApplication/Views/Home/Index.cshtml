@@ -13,7 +13,7 @@
     <td>
         @Html.ActionLink("Categories", "GetCategories", "Category")
     </td>
-    @if (false)
+    @if (User.IsInRole(nameof(RoleEnum.Administrator)))
     {
         <td>
             @Html.ActionLink("Administration", "Users", "Administration")
