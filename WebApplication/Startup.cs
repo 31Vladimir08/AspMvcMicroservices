@@ -22,6 +22,7 @@ using WebApplication.AutoMapperProfile;
 using DataAccessLayer.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using WebApplication.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace WebApplication
 {
@@ -59,6 +60,9 @@ namespace WebApplication
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddDefaultUI()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie();
+
             // Register the Swagger services
             services.AddSwaggerDocument(config =>
             {
@@ -132,8 +136,6 @@ namespace WebApplication
                 .AllowAnyHeader()
                 .SetIsOriginAllowed(origin => true) // allow any origin
                 .AllowCredentials()); // allow credentials
-
-            app.UseAuthorization();
 
             app.UseCacheFile(x =>
             {

@@ -7,8 +7,8 @@ namespace WebApplication
     {
         public static async Task InitializeAsync(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            var adminEmail = "admin";
-            var password = "admin";
+            var adminEmail = "admin@admin.com";
+            var password = "$Admin12345$";
             var t = nameof(RoleEnum.Administrator);
             if (await roleManager.FindByNameAsync(RoleEnum.Administrator.ToString()) == null)
             {
