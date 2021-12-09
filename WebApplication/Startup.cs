@@ -23,6 +23,7 @@ using DataAccessLayer.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using WebApplication.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace WebApplication
 {
@@ -42,6 +43,7 @@ namespace WebApplication
                 .Get<DbSettings>();
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
+            services.Configure<EmailSettings>(Configuration.GetSection(EmailSettings.SettingsKey));
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
@@ -54,6 +56,7 @@ namespace WebApplication
             services.AddScoped<IAplicationDbContext, AplicationDbContext>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<LogingCallsActionFilter>();
             
             services.AddRazorPages();
