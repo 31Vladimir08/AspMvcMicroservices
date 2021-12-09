@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Identity;
 using WebApplication.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Identity.Web;
 
 namespace WebApplication
 {
@@ -44,6 +45,9 @@ namespace WebApplication
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
             services.Configure<EmailSettings>(Configuration.GetSection(EmailSettings.SettingsKey));
+            services.AddMicrosoftIdentityWebApiAuthentication(Configuration, "AzureSettings")
+                .EnableTokenAcquisitionToCallDownstreamApi()
+                .AddInMemoryTokenCaches();
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
