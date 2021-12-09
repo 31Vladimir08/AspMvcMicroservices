@@ -36,7 +36,7 @@ namespace WebApplication.Services
 
                 using (var client = new SmtpClient())
                 {
-                    await client.ConnectAsync(_options.Host, _options.Port, false);
+                    await client.ConnectAsync(_options.Host, _options.Port, true);
                     await client.AuthenticateAsync(_options.UserName, _options.Password);
                     await client.SendAsync(emailMessage);
 

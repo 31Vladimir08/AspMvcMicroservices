@@ -65,6 +65,7 @@ namespace WebApplication
             
             services.AddRazorPages();
             services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddDefaultTokenProviders()
                 .AddDefaultUI()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
