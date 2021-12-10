@@ -23,6 +23,7 @@ using DataAccessLayer.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using WebApplication.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Identity.Web;
 
@@ -45,9 +46,9 @@ namespace WebApplication
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
             services.Configure<EmailSettings>(Configuration.GetSection(EmailSettings.SettingsKey));
-            services.AddMicrosoftIdentityWebApiAuthentication(Configuration, "AzureSettings")
-                .EnableTokenAcquisitionToCallDownstreamApi()
-                .AddInMemoryTokenCaches();
+            //services.AddMicrosoftIdentityWebApiAuthentication(Configuration, "AzureSettings")
+            //    .EnableTokenAcquisitionToCallDownstreamApi()
+            //    .AddInMemoryTokenCaches();
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
@@ -68,8 +69,10 @@ namespace WebApplication
                 .AddDefaultTokenProviders()
                 .AddDefaultUI()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie();
+            services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureSettings"));
+            //services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            //.AddCookie();
 
             // Register the Swagger services
             services.AddSwaggerDocument(config =>
