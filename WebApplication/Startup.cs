@@ -22,10 +22,8 @@ using WebApplication.AutoMapperProfile;
 using DataAccessLayer.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using WebApplication.Data;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authentication;
 
 namespace WebApplication
 {
@@ -38,6 +36,7 @@ namespace WebApplication
 
         public IConfiguration Configuration { get; }
         private DbSettings Options { get; set; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -69,10 +68,13 @@ namespace WebApplication
                 .AddDefaultTokenProviders()
                 .AddDefaultUI()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-                .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureSettings"));
-            //services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            //.AddCookie();
+            services.AddAuthentication()
+                .AddAzureAD(
+                    options =>
+                    {
+                        Configuration.Bind("AzureAd", options);
+                        options.CookieSchemeName = IdentityConstants.ExternalScheme;
+                    });
 
             // Register the Swagger services
             services.AddSwaggerDocument(config =>
