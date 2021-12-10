@@ -45,9 +45,6 @@ namespace WebApplication
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
             services.Configure<EmailSettings>(Configuration.GetSection(EmailSettings.SettingsKey));
-            //services.AddMicrosoftIdentityWebApiAuthentication(Configuration, "AzureSettings")
-            //    .EnableTokenAcquisitionToCallDownstreamApi()
-            //    .AddInMemoryTokenCaches();
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
