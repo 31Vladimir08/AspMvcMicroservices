@@ -59,11 +59,7 @@ namespace WebApplication
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<LogingCallsActionFilter>();
             services.AddTransient<IEmailSender, EmailSender>();
-
-            //services.AddIdentity<IdentityUser, IdentityRole>()
-            //    .AddDefaultTokenProviders()
-            //    .AddDefaultUI()
-            //    .AddEntityFrameworkStores<ApplicationDbContext>();
+            
             services.AddDefaultIdentity<IdentityUser>().AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddAuthentication()
