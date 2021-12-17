@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using WebApplication.NSwag.MyNamespace;
 
 namespace WebApplication.NSwag
 {
