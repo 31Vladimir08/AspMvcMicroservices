@@ -9,7 +9,6 @@ namespace WebApplication
         {
             var adminEmail = "admin@admin.com";
             var password = "$Admin12345$";
-            var t = nameof(RoleEnum.Administrator);
             if (await roleManager.FindByNameAsync(RoleEnum.Administrator.ToString()) == null)
             {
                 await roleManager.CreateAsync(new IdentityRole(RoleEnum.Administrator.ToString()));

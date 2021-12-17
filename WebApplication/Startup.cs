@@ -57,10 +57,10 @@ namespace WebApplication
             services.AddScoped<IAplicationDbContext, AplicationDbContext>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
-            services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<LogingCallsActionFilter>();
+            services.AddTransient<IEmailSender, EmailSender>();
+
             
-            services.AddRazorPages();
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddDefaultTokenProviders()
                 .AddDefaultUI()
@@ -72,6 +72,8 @@ namespace WebApplication
                         Configuration.Bind("AzureAd", options);
                         options.CookieSchemeName = IdentityConstants.ExternalScheme;
                     });
+
+            services.AddRazorPages();
 
             // Register the Swagger services
             services.AddSwaggerDocument(config =>
@@ -153,8 +155,8 @@ namespace WebApplication
                     Path.Combine(env.ContentRootPath, "wwwroot\\images"),
                     cacheExpirationTime: TimeSpan.FromMinutes(1));
             });
-            app.UseAuthentication();    // аутентификация
-            app.UseAuthorization();     // авторизация
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
