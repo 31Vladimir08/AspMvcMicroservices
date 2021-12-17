@@ -5,27 +5,25 @@ namespace WebApplication
 {
     public class RoleInitializer
     {
-        public static async Task InitializeAsync(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static void InitializeAsync(UserManager<IdentityUser> userManager)
         {
             var adminEmail = "admin@admin.com";
             var password = "$Admin12345$";
-            if (await roleManager.FindByNameAsync(RoleEnum.Administrator.ToString()) == null)
+            
+            if (userManager.FindByEmailAsync("admin@admin.com").Result == null)
             {
-                await roleManager.CreateAsync(new IdentityRole(RoleEnum.Administrator.ToString()));
-            }
+                var user = new IdentityUser
+                {
+                    Email = adminEmail,
+                    UserName = adminEmail,
+                    NormalizedUserName = "Admin"
+                };
 
-            if (await roleManager.FindByNameAsync(nameof(RoleEnum.User)) == null)
-            {
-                await roleManager.CreateAsync(new IdentityRole(RoleEnum.User.ToString()));
-            }
+                var result = userManager.CreateAsync(user, password).Result;
 
-            if (await userManager.FindByNameAsync(adminEmail) == null)
-            {
-                var admin = new IdentityUser { Email = adminEmail, UserName = adminEmail, NormalizedUserName = "Admin"};
-                var result = await userManager.CreateAsync(admin, password);
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(admin, RoleEnum.Administrator.ToString());
+                    userManager.AddToRoleAsync(user, nameof(RoleEnum.Administrator)).Wait();
                 }
             }
         }

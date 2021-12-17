@@ -60,10 +60,11 @@ namespace WebApplication
             services.AddScoped<LogingCallsActionFilter>();
             services.AddTransient<IEmailSender, EmailSender>();
 
-            
-            services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddDefaultTokenProviders()
-                .AddDefaultUI()
+            //services.AddIdentity<IdentityUser, IdentityRole>()
+            //    .AddDefaultTokenProviders()
+            //    .AddDefaultUI()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddDefaultIdentity<IdentityUser>().AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddAuthentication()
                 .AddAzureAD(
@@ -100,9 +101,10 @@ namespace WebApplication
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, UserManager<IdentityUser> userManager)
         {
             logger.LogInformation(Options.ConnectionString);
+            RoleInitializer.InitializeAsync(userManager);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
