@@ -20,6 +20,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WebApplication.AutoMapperProfile;
 using DataAccessLayer.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using WebApplication.Data;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Authentication;
 
 namespace WebApplication
 {
@@ -32,6 +36,7 @@ namespace WebApplication
 
         public IConfiguration Configuration { get; }
         private DbSettings Options { get; set; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -39,16 +44,33 @@ namespace WebApplication
                 .Get<DbSettings>();
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
+            services.Configure<EmailSettings>(Configuration.GetSection(EmailSettings.SettingsKey));
             services.AddDbContext<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
                 });
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(Options.IdentityConnectionString));
+
             services.AddAutoMapper(typeof(AutoMapProfiler), typeof(Startup));
             services.AddControllersWithViews();
             services.AddScoped<IAplicationDbContext, AplicationDbContext>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<LogingCallsActionFilter>();
+            services.AddTransient<IEmailSender, EmailSender>();
+            
+            services.AddDefaultIdentity<IdentityUser>().AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddAuthentication()
+                .AddAzureAD(
+                    options =>
+                    {
+                        Configuration.Bind("AzureAd", options);
+                        options.CookieSchemeName = IdentityConstants.ExternalScheme;
+                    });
+
+            services.AddRazorPages();
 
             // Register the Swagger services
             services.AddSwaggerDocument(config =>
@@ -75,9 +97,10 @@ namespace WebApplication
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, UserManager<IdentityUser> userManager)
         {
             logger.LogInformation(Options.ConnectionString);
+            RoleInitializer.InitializeAsync(userManager);
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -124,15 +147,14 @@ namespace WebApplication
                 .SetIsOriginAllowed(origin => true) // allow any origin
                 .AllowCredentials()); // allow credentials
 
-            app.UseAuthorization();
-
             app.UseCacheFile(x =>
             {
                 x.SetParam(
                     Path.Combine(env.ContentRootPath, "wwwroot\\images"),
                     cacheExpirationTime: TimeSpan.FromMinutes(1));
             });
-            
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -143,6 +165,7 @@ namespace WebApplication
                 endpoints.MapControllerRoute(
                         name: "default",
                         pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
     }
