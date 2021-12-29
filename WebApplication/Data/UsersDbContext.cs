@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication.Data
 {
-    public class ApplicationDbContext: IdentityDbContext
+    public class UsersDbContext: IdentityDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public UsersDbContext(DbContextOptions<UsersDbContext> options)
             : base(options)
         {
             Database.EnsureCreated();

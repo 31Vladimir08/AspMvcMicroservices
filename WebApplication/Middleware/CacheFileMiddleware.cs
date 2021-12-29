@@ -75,7 +75,7 @@ namespace WebApplication.Middleware
                     {
                         if (x.CategoryID != categoryId) 
                             return false;
-                        var fileInf = new FileInfo($"{_ob.Pach}\\{x.CategoryID}.png");
+                        var fileInf = new FileInfo($"{_ob.Pach}/{x.CategoryID}.png");
                         if (fileInf.Exists)
                             fileInf.Delete();
                         return true;
@@ -104,7 +104,7 @@ namespace WebApplication.Middleware
                     t.DateOfLastReading = DateTime.Now;
             }
 
-            var fileInf = new FileInfo($"{_ob.Pach}\\{categoryId}.png");
+            var fileInf = new FileInfo($"{_ob.Pach}/{categoryId}.png");
             if (fileInf.Exists)
             {
                 ImagesSerialize();
@@ -112,7 +112,7 @@ namespace WebApplication.Middleware
             }
 
 
-            using (var fileStream = new FileStream($"{_ob.Pach}\\{categoryId}.png",
+            using (var fileStream = new FileStream($"{_ob.Pach}/{categoryId}.png",
                 FileMode.Create))
             {
                 fileStream.Lock(0, fileStream.Length);
@@ -154,12 +154,12 @@ namespace WebApplication.Middleware
 
         private FileSerialazation GetImagesDeserialize()
         {
-            var fileInf = new FileInfo($"{_ob.Pach}\\{SERIALIZATION_FILE_NAME}").Directory;
+            var fileInf = new FileInfo($"{_ob.Pach}/{SERIALIZATION_FILE_NAME}").Directory;
             if (fileInf is {Exists: false})
             {
                 return new FileSerialazation();
             }
-            using (var fileStream = new FileStream($"{_ob.Pach}\\{SERIALIZATION_FILE_NAME}",
+            using (var fileStream = new FileStream($"{_ob.Pach}/{SERIALIZATION_FILE_NAME}",
                 FileMode.OpenOrCreate, FileAccess.Read))
             {
                 fileStream.Lock(0, fileStream.Length);
@@ -171,7 +171,7 @@ namespace WebApplication.Middleware
         private void ImagesSerialize()
         {
             _semaphoreSlim.Wait();
-            using (var fileStream = new FileStream($"{_ob.Pach}\\{SERIALIZATION_FILE_NAME}",
+            using (var fileStream = new FileStream($"{_ob.Pach}/{SERIALIZATION_FILE_NAME}",
                 FileMode.Truncate))
             {
                 fileStream.Lock(0, fileStream.Length);
@@ -207,7 +207,7 @@ namespace WebApplication.Middleware
                         {
                             if (DateTime.Now.Subtract(x.DateOfLastReading) <= _ob.CacheExpirationTime) 
                                 return false;
-                            var fileInf = new FileInfo($"{_ob.Pach}\\{x.CategoryID}.png");
+                            var fileInf = new FileInfo($"{_ob.Pach}/{x.CategoryID}.png");
                             if (fileInf.Exists)
                                 fileInf.Delete();
                             if (FileSerialazation.Pictures.Contains(x))

@@ -49,7 +49,7 @@ namespace WebApplication
                 { 
                     options.UseSqlServer(Options.ConnectionString);
                 });
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<UsersDbContext>(options =>
                 options.UseSqlServer(Options.IdentityConnectionString));
 
             services.AddAutoMapper(typeof(AutoMapProfiler), typeof(Startup));
@@ -59,9 +59,9 @@ namespace WebApplication
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<LogingCallsActionFilter>();
             services.AddTransient<IEmailSender, EmailSender>();
-            
+
             services.AddDefaultIdentity<IdentityUser>().AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<UsersDbContext>();
             services.AddAuthentication()
                 .AddAzureAD(
                     options =>
@@ -97,10 +97,22 @@ namespace WebApplication
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, UserManager<IdentityUser> userManager)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
             logger.LogInformation(Options.ConnectionString);
-            RoleInitializer.InitializeAsync(userManager);
+            using (var scope = app.ApplicationServices.CreateScope())
+            {                
+                try
+                {
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+                    RoleInitializer.InitializeAsync(userManager);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "An error occurred while seeding the database.");
+                }
+            }
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -150,7 +162,7 @@ namespace WebApplication
             app.UseCacheFile(x =>
             {
                 x.SetParam(
-                    Path.Combine(env.ContentRootPath, "wwwroot\\images"),
+                    Path.Combine(env.ContentRootPath, "Cash"),
                     cacheExpirationTime: TimeSpan.FromMinutes(1));
             });
             app.UseAuthentication();
