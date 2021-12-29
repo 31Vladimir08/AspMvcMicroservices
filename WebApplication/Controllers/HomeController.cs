@@ -1,14 +1,12 @@
 ﻿using WebApplication.Filters;
 
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+
+using WebApplication.Models;
+
 namespace WebApplication.Controllers
 {
-
-    using Microsoft.AspNetCore.Mvc;
-    using System;
-    using System.Diagnostics;
-
-    using WebApplication.Models;
-    
     public class HomeController : Controller
     {
         [ServiceFilter(typeof(LogingCallsActionFilter))]

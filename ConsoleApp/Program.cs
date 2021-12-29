@@ -71,7 +71,7 @@ namespace ConsoleApp
                 Console.WriteLine(e.Message);
             }
 
-            Console.ReadLine();
+            Console.ReadKey();
         }
     }
 }

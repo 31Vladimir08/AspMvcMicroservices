@@ -1,10 +1,10 @@
-﻿namespace DataAccessLayer
+﻿using DataAccessLayer.Interfaces;
+using DataAccessLayer.Models;
+
+using Microsoft.EntityFrameworkCore;
+
+namespace DataAccessLayer
 {
-    using DataAccessLayer.Interfaces;
-    using DataAccessLayer.Models;
-
-    using Microsoft.EntityFrameworkCore;
-
     public class AplicationDbContext : DbContext, IAplicationDbContext
     {
         public AplicationDbContext(DbContextOptions<AplicationDbContext> options)

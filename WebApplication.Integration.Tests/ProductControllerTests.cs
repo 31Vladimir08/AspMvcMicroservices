@@ -1,9 +1,11 @@
-using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+
 using FluentAssertions;
+
 using Microsoft.AspNetCore.TestHost;
+
 using NUnit.Framework;
 
 namespace WebApplication.Integration.Tests

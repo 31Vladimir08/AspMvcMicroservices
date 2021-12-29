@@ -1,10 +1,10 @@
-﻿namespace DataAccessLayer.Models
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using System.Collections.Generic;
+
+namespace DataAccessLayer.Models
 {
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-    using System.Collections.Generic;
-
     public class СategoryEntity
     {
         public int CategoryID { get; set; }

@@ -1,8 +1,8 @@
-﻿namespace DataAccessLayer.Models
-{
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+namespace DataAccessLayer.Models
+{
     public class ProductEntity
     {
         public int ProductID { get; set; }

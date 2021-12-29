@@ -2,23 +2,19 @@
 using WebApplication.Filters;
 using WebApplication.Interfaces;
 using WebApplication.Middleware;
+using AutoMapper;
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
+using WebApplication.Models;
 
 namespace WebApplication.Controllers
 {
-    using AutoMapper;
-    using DataAccessLayer.Models;
-
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading.Tasks;
-
-    using WebApplication.Models;
-    
     public class CategoryController : Controller
     {
         private readonly ILogger<CategoryController> _logger;
@@ -57,7 +53,7 @@ namespace WebApplication.Controllers
 
         [HttpGet]
         [ServiceFilter(typeof(LogingCallsActionFilter))]
-        public async Task<ActionResult> GetImage(long? id)
+        public async Task<IActionResult> GetImage(long? id)
         {
             if (id == null || id == 0)
             {
@@ -78,7 +74,7 @@ namespace WebApplication.Controllers
 
         [HttpPost]
         [ServiceFilter(typeof(LogingCallsActionFilter))]
-        public async Task<ActionResult> GetPicture(int? id, IFormFile uploadedFile)
+        public async Task<IActionResult> GetPicture(int? id, IFormFile uploadedFile)
         {
             if (id == null || id == 0)
             {

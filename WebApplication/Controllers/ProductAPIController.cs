@@ -45,14 +45,6 @@ namespace WebApplication.Controllers
             }
         }
 
-        //[HttpGet]
-        //[ServiceFilter(typeof(LogingCallsActionFilter))]
-        //public async Task<IEnumerable<Product>> GetProducts()
-        //{
-        //    var result = await _productService.GetProductsAsync();
-        //    return result;
-        //}
-
         [HttpPost]
         [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<IActionResult> AddProduct([FromBody] Product product)

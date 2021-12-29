@@ -1,11 +1,10 @@
 ﻿using WebApplication.ModelsUI;
+using System.Collections.Generic;
+
+using WebApplication.Models;
 
 namespace WebApplication.ViewModels
 {
-    using System.Collections.Generic;
-
-    using WebApplication.Models;
-
     public class ProductViewModel
     {
         public ProductViewModel ()
