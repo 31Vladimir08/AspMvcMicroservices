@@ -19,7 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HTMLSimpleClient", "HTMLSim
 		Script.js = Script.js
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication.NSwag", "WebApplication.NSwag\WebApplication.NSwag.csproj", "{CD307B4B-8B2C-4108-94B4-5EF7337E7928}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "WebAPI\WebAPI.csproj", "{0129C99A-B9E7-41AA-BC1F-A4E911297368}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,10 @@ Global
 		{82CE3D52-243D-4F6E-A2EC-8A6A006C9F50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82CE3D52-243D-4F6E-A2EC-8A6A006C9F50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82CE3D52-243D-4F6E-A2EC-8A6A006C9F50}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD307B4B-8B2C-4108-94B4-5EF7337E7928}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD307B4B-8B2C-4108-94B4-5EF7337E7928}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD307B4B-8B2C-4108-94B4-5EF7337E7928}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD307B4B-8B2C-4108-94B4-5EF7337E7928}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0129C99A-B9E7-41AA-BC1F-A4E911297368}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0129C99A-B9E7-41AA-BC1F-A4E911297368}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0129C99A-B9E7-41AA-BC1F-A4E911297368}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0129C99A-B9E7-41AA-BC1F-A4E911297368}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -32,16 +32,16 @@ namespace WebApplication
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            Options = Configuration.GetSection(DbSettings.DbSettingsKey)
+                .Get<DbSettings>();
         }
 
         public IConfiguration Configuration { get; }
-        private DbSettings Options { get; set; }
+        private DbSettings Options { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            Options = Configuration.GetSection(DbSettings.DbSettingsKey)
-                .Get<DbSettings>();
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
             services.Configure<EmailSettings>(Configuration.GetSection(EmailSettings.SettingsKey));
