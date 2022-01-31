@@ -1,34 +1,58 @@
-﻿<!DOCTYPE html>
+﻿@using WebApplication.Components
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - WebApplication</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/content/bundleCss.min.css">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-light light-blue lighten-4" role="navigation">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">WebApplication</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"/>
+
+                </div>
+     @*Collect the nav links, forms, and other content for toggling*@ 
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark bi bi-list" asp-area="" asp-controller="Product" asp-action="GetProducts">
+                                Products
+                            </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark bi bi-list" width="50" height="50" asp-area="" asp-controller="Category" asp-action="GetCategories">
+                                Categories
+                            </a>
+                        </li>
+                        @if (User.IsInRole(nameof(RoleEnum.Administrator)))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark bi bi-person-square" width="50" height="50" asp-area="" asp-controller="Administration" asp-action="Users">
+                                    Administration
+                                </a>
+                            </li>
+                        }
                     </ul>
+                    <partial name="_LoginRazorPage" />
                 </div>
             </div>
         </nav>
     </header>
+    <div>
+        <p>
+            @await Component.InvokeAsync(nameof(Breadcrumbs))
+        </p>
+    </div>
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -37,12 +61,24 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2021 - WebApplication - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            @{
+                if (IsSectionDefined("Footer"))
+                {
+                    @RenderSection("Footer")
+                }
+                else if (Convert.ToString(Context.Request.HttpContext.Request.RouteValues["Controller"]) == "Category")
+                {
+                    <footer>2021 - WebApplication. Warning: Categories can't be edited</footer>
+                }
+                else
+                {
+                    <footer>2021 - WebApplication</footer>
+                }
+            }
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/content/bundleScript.min.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

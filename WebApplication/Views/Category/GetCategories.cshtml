@@ -1,0 +1,41 @@
+﻿@model IEnumerable<WebApplication.Models.Сategory>
+
+@{
+    ViewData["Title"] = "View";
+}
+@using WebApplication.TagHelpers
+
+<h1>Categories</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.CategoryName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            @Html.HiddenFor(m => item.CategoryID)
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CategoryName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.ActionLink("Picture", "GetPicture", new { id = item.CategoryID }) |
+                    @Html.NorthwindImageLink(item.CategoryID, $"Link text from Html Helper {item.CategoryID}") |
+                    <northwind image-id="item.CategoryID">Link text from Html Tag @item.CategoryID</northwind>
+</td>
+            </tr>
+        }
+    </tbody>
+</table>

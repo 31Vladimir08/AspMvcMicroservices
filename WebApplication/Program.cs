@@ -1,15 +1,10 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
 namespace WebApplication
 {
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
-
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
     public class Program
     {
         public static void Main(string[] args)
@@ -21,7 +16,18 @@ namespace WebApplication
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
+                    webBuilder.ConfigureAppConfiguration(
+                        config =>
+                        {
+                            config.AddJsonFile("appsettings.json", true);
+                        })
+                    .UseStartup<Startup>();
+                })
+                .ConfigureLogging((context, builder) 
+                    =>
+                    {
+                        builder.AddConfiguration(context.Configuration.GetSection("Logging"));
+                        builder.AddFile();
+                    });
+        }
 }

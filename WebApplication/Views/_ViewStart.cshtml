@@ -1,3 +1,11 @@
 ﻿@{
-    Layout = "_Layout";
+    if (Context.Request.HttpContext.Request.RouteValues["Controller"]?.ToString() == "Home"
+        && Context.Request.HttpContext.Request.RouteValues["Action"]?.ToString() == "Index")
+    {
+        Layout = "_SecondLayout";
+    }
+    else
+    {
+        Layout = "_Layout";
+    }
 }
