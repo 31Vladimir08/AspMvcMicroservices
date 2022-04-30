@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 using WebApplication.Interfaces;
@@ -10,12 +12,14 @@ namespace WebApplication.Middleware
 {
     public class CacheHostedService : IHostedService
     {
-        private readonly ICacheFileProperties _ob;
         private readonly IFileCacheWork _fileCacheWork;
 
-        public CacheHostedService (ICacheFileProperties ob)
+        public CacheHostedService (IWebHostEnvironment env)
         {
-            _ob = ob;
+            var ob = new CacheFileProperties();
+            ob.SetParam(
+                    Path.Combine(env.ContentRootPath, "Cash"),
+                    cacheExpirationTime: TimeSpan.FromSeconds(5));
             _fileCacheWork = new FileCacheWork(ob);
         }
 
