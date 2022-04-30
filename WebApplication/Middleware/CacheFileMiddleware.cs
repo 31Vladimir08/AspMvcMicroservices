@@ -1,11 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
+﻿using System.IO;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Microsoft.AspNetCore.Hosting;
+
 using Microsoft.AspNetCore.Http;
+
 using WebApplication.Interfaces;
 
 namespace WebApplication.Middleware
@@ -22,7 +19,6 @@ namespace WebApplication.Middleware
             _next = next;
             _ob = ob;
             _fileCacheWork = new FileCacheWork(ob);
-            //_ = _fileCacheWork.DeleteOldFilesAsync();
         }
 
         public async Task Invoke(HttpContext context)
