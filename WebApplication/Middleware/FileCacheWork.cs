@@ -5,8 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-using Microsoft.AspNetCore.Http;
-
 using WebApplication.Interfaces;
 
 namespace WebApplication.Middleware
@@ -25,7 +23,7 @@ namespace WebApplication.Middleware
             _semaphoreSlim = new SemaphoreSlim(1);
         }
 
-        private async Task<FileSerialazation> GetImagesDeserializeAsync()
+        private async Task<FileSerialazation> GetDataForCacheFilesAsync()
         {
             return await Task.Run(() =>
             {
@@ -48,7 +46,7 @@ namespace WebApplication.Middleware
         {
             var categoryId = SetCategoryIdForFile(patch);
 
-            var f = await GetImagesDeserializeAsync();
+            var f = await GetDataForCacheFilesAsync();
 
             await Task.Run(() =>
             {
@@ -64,7 +62,7 @@ namespace WebApplication.Middleware
 
                   });
                 f.Pictures.Remove(file);
-                ImagesSerialize(f);
+                SetDataForCache(f);
             });
         }
 
@@ -72,7 +70,7 @@ namespace WebApplication.Middleware
         {
             var categoryId = SetCategoryIdForFile(patch);
 
-            var f = await GetImagesDeserializeAsync();
+            var f = await GetDataForCacheFilesAsync();
 
             if (f.Pictures.Count >= _ob.MaxCount && f.Pictures.All(x => x.CategoryID != categoryId))
                 return;
@@ -95,7 +93,7 @@ namespace WebApplication.Middleware
             var fileInf = new FileInfo($"{_ob.Path}/{categoryId}.png");
             if (fileInf.Exists)
             {
-                ImagesSerialize(f);
+                SetDataForCache(f);
                 return;
             }
 
@@ -109,7 +107,7 @@ namespace WebApplication.Middleware
                 await fileStream.ReadAsync(array, 0, array.Length);
             }
 
-            ImagesSerialize(f);
+            SetDataForCache(f);
             memory.Position = 0;
         }
 
@@ -120,7 +118,7 @@ namespace WebApplication.Middleware
                     FileMode.Open, FileAccess.Read))
             {
                 fileStream.Lock(0, fileStream.Length);
-                var fSerialazation = await GetImagesDeserializeAsync();
+                var fSerialazation = await GetDataForCacheFilesAsync();
                 var image = fSerialazation.Pictures.FirstOrDefault(x => x.CategoryID == categoryId);
                 image.DateOfLastReading = DateTime.Now;
                 byte[] array = new byte[fileStream.Length];
@@ -129,7 +127,7 @@ namespace WebApplication.Middleware
             }
         }
 
-        private void ImagesSerialize(FileSerialazation fileSerialazationDs)
+        private void SetDataForCache(FileSerialazation fileSerialazationDs)
         {
             _semaphoreSlim.Wait();
             using (var fileStream = new FileStream($"{_ob.Path}/{SERIALIZATION_FILE_NAME}",
@@ -146,7 +144,7 @@ namespace WebApplication.Middleware
             await Task.Run(async () =>
             {
                 token.ThrowIfCancellationRequested();
-                var images = await GetImagesDeserializeAsync();
+                var images = await GetDataForCacheFilesAsync();
                 var isImagesSerialize = false;
                 var d =_ob.CacheExpirationTime;
                 var t = images.Pictures
@@ -165,7 +163,7 @@ namespace WebApplication.Middleware
                 if (!isImagesSerialize)
                     return;
                 images.Pictures = t;
-                ImagesSerialize(images);
+                SetDataForCache(images);
             }, token);
         }
 
