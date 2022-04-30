@@ -11,14 +11,13 @@ using WebApplication.Interfaces;
 
 namespace WebApplication.Middleware
 {
-    public class FileCacheWork
+    public class FileCacheWork : IFileCacheWork
     {
         private const string SERIALIZATION_FILE_NAME = "Serialization.xml";
         private readonly ICacheFileProperties _ob;
         private readonly XmlSerializer _xmlSerializer;
         private readonly SemaphoreSlim _semaphoreSlim;
 
-        private FileSerialazation FileSerialazation { get; set; }
         public FileCacheWork(ICacheFileProperties ob)
         {
             _ob = ob;
@@ -26,50 +25,61 @@ namespace WebApplication.Middleware
             _semaphoreSlim = new SemaphoreSlim(1);
         }
 
-        private FileSerialazation GetImagesDeserialize()
+        private async Task<FileSerialazation> GetImagesDeserializeAsync()
         {
-            var fileInf = new FileInfo($"{_ob.Pach}/{SERIALIZATION_FILE_NAME}").Directory;
-            if (fileInf is { Exists: false })
+            return await Task.Run(() =>
             {
-                return new FileSerialazation();
-            }
-            using (var fileStream = new FileStream($"{_ob.Pach}/{SERIALIZATION_FILE_NAME}",
-                FileMode.OpenOrCreate, FileAccess.Read))
-            {
-                fileStream.Lock(0, fileStream.Length);
-                var res = fileStream.Length == 0 ? new FileSerialazation() : _xmlSerializer.Deserialize(fileStream) as FileSerialazation;
-                return res;
-            }
+                var fileInf = new FileInfo($"{_ob.Path}/{SERIALIZATION_FILE_NAME}").Directory;
+                if (fileInf is { Exists: false })
+                {
+                    return new FileSerialazation();
+                }
+                using (var fileStream = new FileStream($"{_ob.Path}/{SERIALIZATION_FILE_NAME}",
+                    FileMode.OpenOrCreate, FileAccess.Read))
+                {
+                    fileStream.Lock(0, fileStream.Length);
+                    var res = fileStream.Length == 0 ? new FileSerialazation() : _xmlSerializer.Deserialize(fileStream) as FileSerialazation;
+                    return res;
+                }
+            }); 
         }
 
-        private async Task AddFileToCacheAsync(MemoryStream memory, string patch, bool isGetFile)
+        public async Task DeleteFileAsync(string patch)
         {
             var categoryId = SetCategoryIdForFile(patch);
 
-            if (isGetFile)
+            var f = await GetImagesDeserializeAsync();
+
+            await Task.Run(() =>
             {
-                var file = FileSerialazation.Pictures.FirstOrDefault(
-                    x =>
-                    {
-                        if (x.CategoryID != categoryId)
-                            return false;
-                        var fileInf = new FileInfo($"{_ob.Pach}/{x.CategoryID}.png");
-                        if (fileInf.Exists)
-                            fileInf.Delete();
-                        return true;
+                var file = f.Pictures.FirstOrDefault(
+                  x =>
+                  {
+                      if (x.CategoryID != categoryId)
+                          return false;
+                      var fileInf = new FileInfo($"{_ob.Path}/{x.CategoryID}.png");
+                      if (fileInf.Exists)
+                          fileInf.Delete();
+                      return true;
 
-                    });
-                FileSerialazation.Pictures.Remove(file);
-                ImagesSerialize();
+                  });
+                f.Pictures.Remove(file);
+                ImagesSerialize(f);
+            });
+        }
+
+        public async Task AddFileToCacheAsync(MemoryStream memory, string patch)
+        {
+            var categoryId = SetCategoryIdForFile(patch);
+
+            var f = await GetImagesDeserializeAsync();
+
+            if (f.Pictures.Count >= _ob.MaxCount && f.Pictures.All(x => x.CategoryID != categoryId))
                 return;
-            }
 
-            if (FileSerialazation.Pictures.Count >= _ob.MaxCount && FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
-                return;
-
-            if (FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
+            if (f.Pictures.All(x => x.CategoryID != categoryId))
             {
-                FileSerialazation.Pictures.Add(new DataSerialazation()
+                f.Pictures.Add(new DataSerialazation()
                 {
                     CategoryID = categoryId,
                     DateOfLastReading = DateTime.Now
@@ -77,20 +87,20 @@ namespace WebApplication.Middleware
             }
             else
             {
-                var t = FileSerialazation.Pictures.FirstOrDefault(x => x.CategoryID != categoryId);
+                var t = f.Pictures.FirstOrDefault(x => x.CategoryID != categoryId);
                 if (t != null)
                     t.DateOfLastReading = DateTime.Now;
             }
 
-            var fileInf = new FileInfo($"{_ob.Pach}/{categoryId}.png");
+            var fileInf = new FileInfo($"{_ob.Path}/{categoryId}.png");
             if (fileInf.Exists)
             {
-                ImagesSerialize();
+                ImagesSerialize(f);
                 return;
             }
 
 
-            using (var fileStream = new FileStream($"{_ob.Pach}/{categoryId}.png",
+            using (var fileStream = new FileStream($"{_ob.Path}/{categoryId}.png",
                 FileMode.Create))
             {
                 fileStream.Lock(0, fileStream.Length);
@@ -99,37 +109,64 @@ namespace WebApplication.Middleware
                 await fileStream.ReadAsync(array, 0, array.Length);
             }
 
-            ImagesSerialize();
+            ImagesSerialize(f);
             memory.Position = 0;
         }
 
-        private async Task<byte[]> GetFileFromCacheAsync(string patch)
+        public async Task<byte[]> GetFileFromCacheAsync(string patch)
         {
             var categoryId = SetCategoryIdForFile(patch);
-            using (var fileStream = new FileStream($"{_ob.Pach}/{categoryId}.png",
+            using (var fileStream = new FileStream($"{_ob.Path}/{categoryId}.png",
                     FileMode.Open, FileAccess.Read))
             {
                 fileStream.Lock(0, fileStream.Length);
-                var fSerialazation = GetImagesDeserialize();
+                var fSerialazation = await GetImagesDeserializeAsync();
                 var image = fSerialazation.Pictures.FirstOrDefault(x => x.CategoryID == categoryId);
                 image.DateOfLastReading = DateTime.Now;
                 byte[] array = new byte[fileStream.Length];
                 await fileStream.ReadAsync(array, 0, array.Length);
-                FileSerialazation = fSerialazation;
                 return array;
             }
         }
 
-        private void ImagesSerialize()
+        private void ImagesSerialize(FileSerialazation fileSerialazationDs)
         {
             _semaphoreSlim.Wait();
-            using (var fileStream = new FileStream($"{_ob.Pach}/{SERIALIZATION_FILE_NAME}",
+            using (var fileStream = new FileStream($"{_ob.Path}/{SERIALIZATION_FILE_NAME}",
                 FileMode.Truncate))
             {
                 fileStream.Lock(0, fileStream.Length);
-                _xmlSerializer.Serialize(fileStream, FileSerialazation);
+                _xmlSerializer.Serialize(fileStream, fileSerialazationDs);
             }
             _semaphoreSlim.Release();
+        }
+
+        public async Task DeleteOldFilesAsync(CancellationToken token = default)
+        {
+            await Task.Run(async () =>
+            {
+                token.ThrowIfCancellationRequested();
+                var images = await GetImagesDeserializeAsync();
+                var isImagesSerialize = false;
+                var d =_ob.CacheExpirationTime;
+                var t = images.Pictures
+                    .Where(
+                    x =>
+                    {
+                        if (DateTime.Now.Subtract(x.DateOfLastReading) <= _ob.CacheExpirationTime)
+                            return true;
+                        var fileInf = new FileInfo($"{_ob.Path}/{x.CategoryID}.png");
+                        if (fileInf.Exists)
+                            fileInf.Delete();
+                        isImagesSerialize = true;
+                        return false;
+                    }).ToList();
+
+                if (!isImagesSerialize)
+                    return;
+                images.Pictures = t;
+                ImagesSerialize(images);
+            }, token);
         }
 
         private string SetCategoryIdForFile(string path)

@@ -5,13 +5,13 @@ namespace WebApplication.Middleware
 {
     public class CacheFileProperties : ICacheFileProperties
     {
-        public string Pach  { get; private set; }
+        public string Path  { get; private set; }
         public int MaxCount { get; private set; }
         public TimeSpan CacheExpirationTime { get; private set; }
 
         public void SetParam(string path, int maxCount = 10, TimeSpan? cacheExpirationTime = null)
         {
-            Pach = path;
+            Path = path;
             MaxCount = maxCount;
             CacheExpirationTime = cacheExpirationTime ?? TimeSpan.FromMinutes(10);
         }
