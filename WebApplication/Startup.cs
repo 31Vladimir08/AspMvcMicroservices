@@ -163,7 +163,7 @@ namespace WebApplication
             {
                 x.SetParam(
                     Path.Combine(env.ContentRootPath, "Cash"),
-                    cacheExpirationTime: TimeSpan.FromMinutes(1));
+                    cacheExpirationTime: TimeSpan.FromSeconds(5));
             });
             app.UseAuthentication();
             app.UseAuthorization();

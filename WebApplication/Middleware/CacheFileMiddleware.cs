@@ -19,7 +19,6 @@ namespace WebApplication.Middleware
         private readonly XmlSerializer _xmlSerializer;
         private readonly SemaphoreSlim _semaphoreSlim;
         public static readonly object HttpContextItemsCacheFileMiddlewareKey = new();
-        private FileSerialazation FileSerialazation { get; set; }
 
         public CacheFileMiddleware(RequestDelegate next, IWebHostEnvironment env, ICacheFileProperties ob)
         {
@@ -28,7 +27,6 @@ namespace WebApplication.Middleware
             _ob = ob;
             _xmlSerializer = new XmlSerializer(typeof(FileSerialazation));
             _semaphoreSlim = new SemaphoreSlim(1);
-            FileSerialazation = GetImagesDeserialize();
             DeleteOldFiles();
         }
 
@@ -66,11 +64,12 @@ namespace WebApplication.Middleware
                 (route["action"]?.ToString() != "GetImage" && route["action"]?.ToString() != "GetPicture"))
                 return;
 
+            var f = GetImagesDeserialize();
             var categoryId = SetCategoryIdForFile(context.Request.Path);
 
             if (route["action"]?.ToString() == "GetPicture")
             {
-                var file = FileSerialazation.Pictures.FirstOrDefault(
+                var file = f.Pictures.FirstOrDefault(
                     x =>
                     {
                         if (x.CategoryID != categoryId) 
@@ -81,17 +80,17 @@ namespace WebApplication.Middleware
                         return true;
 
                     });
-                FileSerialazation.Pictures.Remove(file);
-                ImagesSerialize();
+                f.Pictures.Remove(file);
+                ImagesSerialize(f);
                 return;
             }
             
-            if (FileSerialazation.Pictures.Count >= _ob.MaxCount && FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
+            if (f.Pictures.Count >= _ob.MaxCount && f.Pictures.All(x => x.CategoryID != categoryId))
                 return;
 
-            if (FileSerialazation.Pictures.All(x => x.CategoryID != categoryId))
+            if (f.Pictures.All(x => x.CategoryID != categoryId))
             {
-                FileSerialazation.Pictures.Add(new DataSerialazation()
+                f.Pictures.Add(new DataSerialazation()
                 {
                     CategoryID = categoryId,
                     DateOfLastReading = DateTime.Now
@@ -99,7 +98,7 @@ namespace WebApplication.Middleware
             }
             else
             {
-                var t = FileSerialazation.Pictures.FirstOrDefault(x => x.CategoryID != categoryId);
+                var t = f.Pictures.FirstOrDefault(x => x.CategoryID != categoryId);
                 if (t != null)
                     t.DateOfLastReading = DateTime.Now;
             }
@@ -107,7 +106,7 @@ namespace WebApplication.Middleware
             var fileInf = new FileInfo($"{_ob.Pach}/{categoryId}.png");
             if (fileInf.Exists)
             {
-                ImagesSerialize();
+                ImagesSerialize(f);
                 return;
             }
 
@@ -121,7 +120,7 @@ namespace WebApplication.Middleware
                 await fileStream.ReadAsync(array, 0, array.Length);
             }
 
-            ImagesSerialize();
+            ImagesSerialize(f);
             memory.Position = 0;
         }
 
@@ -138,8 +137,8 @@ namespace WebApplication.Middleware
                     FileMode.Open, FileAccess.Read))
                 {
                     fileStream.Lock(0, fileStream.Length);
-                    FileSerialazation = GetImagesDeserialize();
-                    var image = FileSerialazation.Pictures.FirstOrDefault(x => x.CategoryID == categoryId);
+                    var fSerialazation = GetImagesDeserialize();
+                    var image = fSerialazation.Pictures.FirstOrDefault(x => x.CategoryID == categoryId);
                     image.DateOfLastReading = DateTime.Now;
                     byte[] array = new byte[fileStream.Length];
                     await fileStream.ReadAsync(array, 0, array.Length);
@@ -168,14 +167,14 @@ namespace WebApplication.Middleware
             }
         }
         
-        private void ImagesSerialize()
+        private void ImagesSerialize(FileSerialazation fileSerialazationDs)
         {
             _semaphoreSlim.Wait();
             using (var fileStream = new FileStream($"{_ob.Pach}/{SERIALIZATION_FILE_NAME}",
                 FileMode.Truncate))
             {
                 fileStream.Lock(0, fileStream.Length);
-                _xmlSerializer.Serialize(fileStream, FileSerialazation);
+                _xmlSerializer.Serialize(fileStream, fileSerialazationDs);
             }
             _semaphoreSlim.Release();
         }
@@ -201,27 +200,23 @@ namespace WebApplication.Middleware
                     token.ThrowIfCancellationRequested();
                     var images = GetImagesDeserialize();
                     var isImagesSerialize = false;
-                    var _ = images.Pictures
+                    var t = images.Pictures
                         .Where(
                         x =>
                         {
                             if (DateTime.Now.Subtract(x.DateOfLastReading) <= _ob.CacheExpirationTime) 
-                                return false;
+                                return true;
                             var fileInf = new FileInfo($"{_ob.Pach}/{x.CategoryID}.png");
                             if (fileInf.Exists)
                                 fileInf.Delete();
-                            if (FileSerialazation.Pictures.Contains(x))
-                            {
-                                FileSerialazation.Pictures.Remove(x);
-                            }
                             isImagesSerialize = true;
-                            return true;
+                            return false;
                         }).ToList();
 
                     if (!isImagesSerialize)
                         continue;
-                    
-                    ImagesSerialize();
+                    images.Pictures = t;
+                    ImagesSerialize(images);
                 }
             }, token);
         }
