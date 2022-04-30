@@ -16,6 +16,7 @@ namespace WebApplication.Middleware
 
         public CacheHostedService (IWebHostEnvironment env)
         {
+            //TODO Temporary decision
             var ob = new CacheFileProperties();
             ob.SetParam(
                     Path.Combine(env.ContentRootPath, "Cash"),
@@ -44,7 +45,7 @@ namespace WebApplication.Middleware
                 }
                 catch (Exception ex)
                 {
-                    // обработка ошибки однократного неуспешного выполнения фоновой задачи
+                    throw new System.NotImplementedException();
                 }
 
                 await Task.Delay(5000, stoppingToken);
