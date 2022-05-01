@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Identity;
 using WebApplication.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Authentication;
+using WebApplication.Middleware;
 
 namespace WebApplication
 {
@@ -60,6 +61,7 @@ namespace WebApplication
             services.AddScoped<LogingCallsActionFilter>();
             services.AddTransient<IEmailSender, EmailSender>();
 
+            services.AddHostedService<CacheHostedService>();
             services.AddDefaultIdentity<IdentityUser>().AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<UsersDbContext>();
             services.AddAuthentication()
@@ -163,7 +165,7 @@ namespace WebApplication
             {
                 x.SetParam(
                     Path.Combine(env.ContentRootPath, "Cash"),
-                    cacheExpirationTime: TimeSpan.FromMinutes(1));
+                    cacheExpirationTime: TimeSpan.FromSeconds(5));
             });
             app.UseAuthentication();
             app.UseAuthorization();
