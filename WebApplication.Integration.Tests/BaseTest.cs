@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 
 using DataAccessLayer;
-using DataAccessLayer.Interfaces;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -36,7 +35,6 @@ namespace WebApplication.Integration.Tests
                     webHost.UseTestServer();
                     webHost.ConfigureServices((context, services) =>
                     {
-                        services.AddScoped<IAplicationDbContext, AplicationDbContext>();
                         services.AddScoped<IProductService, ProductService>();
                         services.AddScoped<ICategoryService, CategoryService>();
                         services.AddScoped<LogingCallsActionFilter>();

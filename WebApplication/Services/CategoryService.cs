@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using DataAccessLayer.Interfaces;
+
+using DataAccessLayer;
 using DataAccessLayer.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -15,70 +16,84 @@ namespace WebApplication.Services
     public class CategoryService : ICategoryService
     {
         private readonly IMapper _mapper;
-        private readonly IAplicationDbContext _dbContext;
+        private readonly IDbContextFactory<AplicationDbContext> _contextFactory;
         private readonly DbSettings _options;
 
-        public CategoryService(IOptions<DbSettings> options, IMapper mapper, IAplicationDbContext dbContext)
+        public CategoryService(IOptions<DbSettings> options, IMapper mapper, IDbContextFactory<AplicationDbContext> contextFactory)
         {
             _mapper = mapper;
-            _dbContext = dbContext;
+            _contextFactory = contextFactory;
             _options = options.Value;
         }
 
         public async Task DeleteСategoryAsync(Сategory product)
         {
-            try
+            using (var context = _contextFactory.CreateDbContext())
             {
-                var category = _mapper.Map<СategoryEntity>(product);
-                await _dbContext.Database.BeginTransactionAsync();
-                _dbContext.Set<СategoryEntity>().Remove(category);
+                try
+                {
+                    await context.Database.BeginTransactionAsync();
+                    var category = _mapper.Map<СategoryEntity>(product);
+                    context.Set<СategoryEntity>().Remove(category);
 
-                await _dbContext.SaveChangesAsync();
-                await _dbContext.Database.CommitTransactionAsync();
-            }
-            catch (Exception ex)
-            {
-                await _dbContext.Database.RollbackTransactionAsync();
-                throw;
-            }
+                    await context.SaveChangesAsync();
+                    await context.Database.CommitTransactionAsync();
+                }
+                catch (Exception ex)
+                {
+                    await context.Database.RollbackTransactionAsync();
+                    throw;
+                }
+            }            
         }
 
         public async Task EditСategoryAsync(Сategory product)
         {
-            try
+            using (var context = _contextFactory.CreateDbContext())
             {
-                var category = _mapper.Map<СategoryEntity>(product);
-                await _dbContext.Database.BeginTransactionAsync();
-                _dbContext.Set<СategoryEntity>().Update(category);
+                try
+                {
+                    await context.Database.BeginTransactionAsync();
+                    var category = _mapper.Map<СategoryEntity>(product);
+                    context.Set<СategoryEntity>().Update(category);
 
-                await _dbContext.SaveChangesAsync();
-                await _dbContext.Database.CommitTransactionAsync();
-            }
-            catch (Exception ex)
-            {
-                await _dbContext.Database.RollbackTransactionAsync();
-                throw;
-            }
+                    await context.SaveChangesAsync();
+                    await context.Database.CommitTransactionAsync();
+                }
+                catch (Exception ex)
+                {
+                    await context.Database.RollbackTransactionAsync();
+                    throw;
+                }
+            }            
         }
 
         public async Task<IEnumerable<Сategory>> GetCategoriesAsync()
         {
-            var db = await _dbContext.Set<СategoryEntity>().AsNoTracking().ToListAsync();
-            var result = _mapper.Map<IEnumerable<Сategory>>(db);
-            return result;
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                var db = await context.Set<СategoryEntity>().AsNoTracking().ToListAsync();
+                var result = _mapper.Map<IEnumerable<Сategory>>(db);
+                return result;
+            }           
         }
 
         public async Task<Сategory> GetСategoryAllAsync(int id)
         {
-            var res = await _dbContext.Set<СategoryEntity>()
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                var res = await context.Set<СategoryEntity>()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.CategoryID == id);
-            return _mapper.Map<Сategory>(res);
+                return _mapper.Map<Сategory>(res);
+            }            
         }
 
         public async Task<Сategory> GetСategoryAsync(int id)
         {
-            var res = await _dbContext.Set<СategoryEntity>()
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                var res = await context.Set<СategoryEntity>()
                 .AsNoTracking()
                 .Where(x => x.CategoryID == id)
                 .Select(x => new СategoryEntity
@@ -89,17 +104,21 @@ namespace WebApplication.Services
                     Products = x.Products
                 })
                 .FirstOrDefaultAsync();
-            return _mapper.Map<Сategory>(res);
+                return _mapper.Map<Сategory>(res);
+            }  
         }
 
         public async Task<byte[]> GetСategoryImageAsync(int id)
         {
-            var res = await _dbContext.Set<СategoryEntity>()
+            using (var context = _contextFactory.CreateDbContext())
+            {
+                var res = await context.Set<СategoryEntity>()
                 .AsNoTracking()
                 .Where(x => x.CategoryID == id)
                 .Select(x => x.Picture)
                 .FirstOrDefaultAsync();
-            return res;
+                return res;
+            }
         }
     }
 }

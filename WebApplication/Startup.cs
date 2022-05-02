@@ -19,7 +19,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WebApplication.AutoMapperProfile;
-using DataAccessLayer.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using WebApplication.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -46,7 +45,7 @@ namespace WebApplication
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
             services.Configure<EmailSettings>(Configuration.GetSection(EmailSettings.SettingsKey));
-            services.AddDbContext<AplicationDbContext>(options =>
+            services.AddDbContextFactory<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
                 });
@@ -55,7 +54,6 @@ namespace WebApplication
 
             services.AddAutoMapper(typeof(AutoMapProfiler), typeof(Startup));
             services.AddControllersWithViews();
-            services.AddScoped<IAplicationDbContext, AplicationDbContext>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<LogingCallsActionFilter>();
