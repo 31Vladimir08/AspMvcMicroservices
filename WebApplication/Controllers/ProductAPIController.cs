@@ -87,7 +87,7 @@ namespace WebApplication.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         [ServiceFilter(typeof(LogingCallsActionFilter))]
         public async Task<IActionResult> EditProduct([FromBody] Product product)
         {
@@ -107,9 +107,9 @@ namespace WebApplication.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [ServiceFilter(typeof(LogingCallsActionFilter))]
-        public async Task<IActionResult> DeleteProduct([FromBody] Product product)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
             if (!ModelState.IsValid)
             {
@@ -118,7 +118,7 @@ namespace WebApplication.Controllers
 
             try
             {
-                await _productService.DeleteProductAsync(product);
+                await _productService.DeleteProductAsync(new Product() { ProductID = id });
                 return Ok();
             }
             catch (Exception e)
