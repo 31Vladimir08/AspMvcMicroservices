@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 
 using WebApplication.Interfaces;
 
@@ -14,11 +15,11 @@ namespace WebApplication.Middleware
         public static readonly object HttpContextItemsCacheFileMiddlewareKey = new();
         private readonly IFileCacheWork _fileCacheWork;
 
-        public CacheFileMiddleware(RequestDelegate next, ICacheFileProperties ob)
+        public CacheFileMiddleware(RequestDelegate next, ICacheFileProperties ob, IDistributedCache cache)
         {
             _next = next;
             _ob = ob;
-            _fileCacheWork = new FileCacheWork(ob);
+            _fileCacheWork = new FileCacheWork(ob, cache);
         }
 
         public async Task Invoke(HttpContext context)

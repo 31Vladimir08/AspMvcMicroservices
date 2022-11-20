@@ -62,6 +62,11 @@ namespace WebApplication
             services.AddHostedService<CacheHostedService>();
             services.AddDefaultIdentity<IdentityUser>().AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<UsersDbContext>();
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = Configuration["RedisConnection"];
+                options.InstanceName = "SampleInstance";
+            });
             services.AddAuthentication()
                 .AddAzureAD(
                     options =>
@@ -163,7 +168,8 @@ namespace WebApplication
             {
                 x.SetParam(
                     Path.Combine(env.ContentRootPath, "Cash"),
-                    cacheExpirationTime: TimeSpan.FromSeconds(5));
+                    maxCount: int.Parse(Configuration["CacheFileProperties:MaxCountFiles"]),
+                    cacheExpirationTime: TimeSpan.FromMinutes(double.Parse(Configuration["CacheFileProperties:CacheExpirationTimeMinutes"])));
             });
             app.UseAuthentication();
             app.UseAuthorization();

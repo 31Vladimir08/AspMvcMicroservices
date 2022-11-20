@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 using WebApplication.Interfaces;
@@ -14,14 +16,14 @@ namespace WebApplication.Middleware
     {
         private readonly IFileCacheWork _fileCacheWork;
 
-        public CacheHostedService (IWebHostEnvironment env)
+        public CacheHostedService (IWebHostEnvironment env, IDistributedCache cache, IConfiguration configuration)
         {
-            //TODO Temporary decision
             var ob = new CacheFileProperties();
             ob.SetParam(
                     Path.Combine(env.ContentRootPath, "Cash"),
-                    cacheExpirationTime: TimeSpan.FromSeconds(5));
-            _fileCacheWork = new FileCacheWork(ob);
+                    maxCount: int.Parse(configuration["CacheFileProperties:MaxCountFiles"]),
+                    cacheExpirationTime: TimeSpan.FromMinutes(double.Parse(configuration["CacheFileProperties:CacheExpirationTimeMinutes"])));
+            _fileCacheWork = new FileCacheWork(ob, cache);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -42,6 +44,10 @@ namespace WebApplication.Middleware
                 try
                 {
                     await _fileCacheWork.DeleteOldFilesAsync();
+                }
+                catch (IOException ex)
+                {
+                    // ignore
                 }
                 catch (Exception ex)
                 {

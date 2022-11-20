@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+
 using WebApplication.Interfaces;
 
 namespace WebApplication.Middleware
@@ -11,6 +13,12 @@ namespace WebApplication.Middleware
 
         public void SetParam(string path, int maxCount = 10, TimeSpan? cacheExpirationTime = null)
         {
+            var directory = new DirectoryInfo(path);
+            if (!directory.Exists)
+            {
+                Directory.CreateDirectory(path);
+            }
+
             Path = path;
             MaxCount = maxCount;
             CacheExpirationTime = cacheExpirationTime ?? TimeSpan.FromMinutes(10);
