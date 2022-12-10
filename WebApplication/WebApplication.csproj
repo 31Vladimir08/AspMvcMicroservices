@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
     <PackageReference Include="MailKit" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureAD.UI" Version="6.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.4" />
@@ -36,5 +37,11 @@
 
   <ItemGroup>
     <None Include="bundleconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\ExchangeRatesAgainstDollar.Grpc\Protos\exchangeRates.proto" GrpcServices="Client">
+      <Link>Protos\exchangeRates.proto</Link>
+    </Protobuf>
   </ItemGroup>
 </Project>

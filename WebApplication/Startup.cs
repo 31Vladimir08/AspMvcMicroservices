@@ -8,7 +8,6 @@ using System.Net;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using WebApplication.Models;
 
 using DataAccessLayer;
 
@@ -24,6 +23,9 @@ using WebApplication.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Authentication;
 using WebApplication.Middleware;
+using ExchangeRatesAgainstDollar.Grpc.Protos;
+using WebApplication.GrpcServices;
+using WebApplication.Models.Settings;
 
 namespace WebApplication
 {
@@ -45,6 +47,7 @@ namespace WebApplication
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
             services.Configure<EmailSettings>(Configuration.GetSection(EmailSettings.SettingsKey));
+            services.Configure<CurrensyTypes>(Configuration.GetSection("CurrensyTypes"));
             services.AddDbContextFactory<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);
@@ -58,6 +61,9 @@ namespace WebApplication
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<LogingCallsActionFilter>();
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddGrpcClient<ExchangeRateService.ExchangeRateServiceClient>(
+                o => o.Address = new Uri(Configuration["GrpcSettings:CurrensyUrl"]));
+            services.AddScoped<ExchangeRateGrpcService>();
 
             services.AddHostedService<CacheHostedService>();
             services.AddDefaultIdentity<IdentityUser>().AddRoles<IdentityRole>()

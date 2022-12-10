@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication.Models;
+using WebApplication.Models.Settings;
 using WebApplication.ViewModels;
 
 namespace WebApplication.Components

@@ -1,4 +1,4 @@
-﻿namespace WebApplication.Models
+﻿namespace WebApplication.Models.Settings
 {
     public class DbSettings
     {
