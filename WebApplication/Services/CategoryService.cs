@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using WebApplication.Interfaces;
 using WebApplication.Models;
+using WebApplication.Models.Settings;
 
 namespace WebApplication.Services
 {

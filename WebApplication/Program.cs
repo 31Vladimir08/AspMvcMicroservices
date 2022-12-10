@@ -29,5 +29,5 @@ namespace WebApplication
                         builder.AddConfiguration(context.Configuration.GetSection("Logging"));
                         builder.AddFile();
                     });
-        }
+    }
 }

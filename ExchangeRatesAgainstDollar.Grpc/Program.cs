@@ -1,16 +1,13 @@
-
-
-using ExchangeRatesAgainstTheDollar.Grpc.Models.Settings;
-using ExchangeRatesAgainstTheDollar.Grpc.Services;
-
-using Microsoft.Extensions.DependencyInjection;
+using ExchangeRatesAgainstDollar.Grpc.Models.Settings;
+using ExchangeRatesAgainstDollar.Grpc.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders().AddFile();
 
 // Additional configuration is required to successfully run gRPC on macOS.
 // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
-//builder.Services.Configure<WebCurrensySettings>(builder.Configuration.GetSection("WebCurrensySettings"));
-
+builder.Services.Configure<WebCurrensySettings>(builder.Configuration.GetSection("WebCurrensySettings"));
+builder.Services.AddHttpClient();
 // Add services to the container.
 builder.Services.AddGrpc();
 

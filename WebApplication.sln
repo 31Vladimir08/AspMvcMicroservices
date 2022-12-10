@@ -21,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HTMLSimpleClient", "HTMLSim
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication.NSwag", "WebApplication.NSwag\WebApplication.NSwag.csproj", "{CD307B4B-8B2C-4108-94B4-5EF7337E7928}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRatesAgainstTheDollar.Grpc", "ExchangeRatesAgainstTheDollar.Grpc\ExchangeRatesAgainstTheDollar.Grpc.csproj", "{27379C34-B50A-47B9-9E1E-50B0CD20EDFB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRatesAgainstDollar.Grpc", "ExchangeRatesAgainstDollar.Grpc\ExchangeRatesAgainstDollar.Grpc.csproj", "{1B0A1AA7-DAB8-4AB6-9F71-CC3F13AF3951}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,10 +53,10 @@ Global
 		{CD307B4B-8B2C-4108-94B4-5EF7337E7928}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD307B4B-8B2C-4108-94B4-5EF7337E7928}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD307B4B-8B2C-4108-94B4-5EF7337E7928}.Release|Any CPU.Build.0 = Release|Any CPU
-		{27379C34-B50A-47B9-9E1E-50B0CD20EDFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{27379C34-B50A-47B9-9E1E-50B0CD20EDFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{27379C34-B50A-47B9-9E1E-50B0CD20EDFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{27379C34-B50A-47B9-9E1E-50B0CD20EDFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B0A1AA7-DAB8-4AB6-9F71-CC3F13AF3951}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B0A1AA7-DAB8-4AB6-9F71-CC3F13AF3951}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B0A1AA7-DAB8-4AB6-9F71-CC3F13AF3951}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B0A1AA7-DAB8-4AB6-9F71-CC3F13AF3951}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

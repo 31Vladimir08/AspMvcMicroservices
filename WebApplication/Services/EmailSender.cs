@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using WebApplication.Models;
+using WebApplication.Models.Settings;
 
 namespace WebApplication.Services
 {
