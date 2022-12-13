@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using ExchangeRatesAgainstDollar.Grpc.Protos;
 
@@ -31,9 +32,10 @@ namespace WebApplication.GrpcServices
 
             var response = await _exchangeRateServiceClient.GetTheExchangeRateAsync(request);
 
-            if (string.IsNullOrWhiteSpace(response.Error))
+            if (!string.IsNullOrWhiteSpace(response.Error))
             {
                 _logger.LogError(response.Error);
+                return null;
             }
 
             var value = ConvertExchangeRateModelToDecimal(response);
@@ -43,6 +45,30 @@ namespace WebApplication.GrpcServices
                     CurrnesyCode = currensyCode,
                     Value = value
             };
+        }
+
+        public async Task<IEnumerable<Currensy>> GetTheExchangeRateListAsync()
+        {
+            var response = await _exchangeRateServiceClient.GetTheExchangeRateListAsync(new GetTheExchangeRateAllRequest());
+
+            var result = new List<Currensy>();
+            if (!string.IsNullOrWhiteSpace(response.Error))
+            {
+                _logger.LogError(response.Error);
+                return result;
+            }
+
+            foreach (var item in response.ExchangesRates)
+            {
+                var value = ConvertExchangeRateModelToDecimal(item);
+                result.Add(new Currensy()
+                {
+                    CurrnesyCode = item.CurrencyCode,
+                    Value = value
+                });
+            }
+
+            return result;
         }
 
         private decimal ConvertExchangeRateModelToDecimal(ExchangeRateModel model)
