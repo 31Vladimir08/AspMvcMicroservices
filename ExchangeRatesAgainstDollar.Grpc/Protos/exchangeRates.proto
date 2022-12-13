@@ -4,10 +4,15 @@ option csharp_namespace = "ExchangeRatesAgainstDollar.Grpc.Protos";
 
 service ExchangeRateService {
 	rpc GetTheExchangeRate (GetTheExchangeRateRequest) returns (ExchangeRateModel);
+    rpc GetTheExchangeRateList (GetTheExchangeRateAllRequest) returns (ExchangeRateModelList);
 }
 
 message GetTheExchangeRateRequest {
     string currencyCode = 1;
+}
+
+message GetTheExchangeRateAllRequest {
+
 }
 
 message ExchangeRateModel {
@@ -21,3 +26,8 @@ message ExchangeRateModel {
     // Must be same sign as units
     sfixed32 nanos = 4;
 }
+message ExchangeRateModelList {
+	repeated ExchangeRateModel ExchangesRates = 1;
+    string error = 2;
+}
+

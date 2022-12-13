@@ -23,8 +23,7 @@ namespace WebApplication.Controllers
         public HomeController(
             ExchangeRateGrpcService exchangeRateGrpcService, 
             ILogger<HomeController> logger,
-            IOptions<CurrensyTypes> currensyTypes,
-            IConfiguration configuration) 
+            IOptions<CurrensyTypes> currensyTypes) 
         {
             _exchangeRateGrpcService = exchangeRateGrpcService;
             _logger = logger;
@@ -37,10 +36,10 @@ namespace WebApplication.Controllers
             var vm = new IndexViewModel();
             try
             {
-                foreach (var item in _currensyTypes.CurrensyList)
+                var currencies = await _exchangeRateGrpcService.GetTheExchangeRateListAsync();
+                foreach (var item in currencies)
                 {
-                    var currensy = await _exchangeRateGrpcService.GetTheExchangeRateAsync(item);
-                    vm.Currensies.Add(currensy);
+                    vm.Currensies.Add(item);
                 }
             }
             catch (RpcException e)

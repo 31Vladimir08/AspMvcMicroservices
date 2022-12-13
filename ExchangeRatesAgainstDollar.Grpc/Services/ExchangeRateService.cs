@@ -1,8 +1,6 @@
 ﻿using ExchangeRatesAgainstDollar.Grpc.Models.Settings;
 using ExchangeRatesAgainstDollar.Grpc.Protos;
 
-using Google.Protobuf.WellKnownTypes;
-
 using Grpc.Core;
 
 using HtmlAgilityPack;
@@ -66,6 +64,51 @@ namespace ExchangeRatesAgainstDollar.Grpc.Services
                     Error = er
                 };
             }            
+        }
+
+        public override async Task<ExchangeRateModelList> GetTheExchangeRateList(GetTheExchangeRateAllRequest request, ServerCallContext context)
+        {
+            try
+            {
+                using (var httpClient = _httpClientFactory.CreateClient())
+                {
+                    var sr = await httpClient.GetStreamAsync(_webCurrensySettings.Url);
+
+                    var html = string.Empty;
+                    using (var myStreamReader = new StreamReader(sr))
+                    {
+                        html = await myStreamReader.ReadToEndAsync();
+                    }
+
+                    var htmlSnippet = new HtmlDocument();
+                    htmlSnippet.LoadHtml(html);
+                    var result = new ExchangeRateModelList();
+                    foreach (var item in _webCurrensySettings.PatchToCurrensyElements)
+                    {
+                        var titleNode = htmlSnippet.DocumentNode.SelectSingleNode(
+                        _webCurrensySettings.PatchToCurrensyElements.FirstOrDefault(x => x.CurrnesyCode == item.CurrnesyCode)?.PatchToCurrensyElement)?.InnerText;
+                        var value = ConvertResponseToExchangeRateModel(titleNode);
+                        result.ExchangesRates.Add(new ExchangeRateModel()
+                        {
+                            CurrencyCode = item.CurrnesyCode,
+                            Error = string.Empty,
+                            Nanos = value.nanos,
+                            Units = value.units
+                        });
+                    }
+
+                    return result;
+                }
+            }
+            catch (Exception e)
+            {
+                var er = $"{e.Message}, {e.StackTrace}";
+                _logger.LogError(er);
+                return new ExchangeRateModelList()
+                {
+                    Error = er
+                };
+            }
         }
 
         private (int nanos, long units) ConvertResponseToExchangeRateModel(string? number)
