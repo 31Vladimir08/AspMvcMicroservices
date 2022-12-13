@@ -5,7 +5,6 @@ using ExchangeRatesAgainstDollar.Grpc.Protos;
 
 using Microsoft.Extensions.Logging;
 
-using WebApplication.Controllers;
 using WebApplication.Models.Settings;
 
 namespace WebApplication.GrpcServices
