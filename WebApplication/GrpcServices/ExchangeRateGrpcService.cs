@@ -72,7 +72,7 @@ namespace WebApplication.GrpcServices
 
         private decimal ConvertExchangeRateModelToDecimal(ExchangeRateModel model)
         {
-            var result = System.Convert.ToDecimal($"{model.Nanos}.{model.Units}");
+            decimal.TryParse($"{model.Nanos}.{model.Units}", out var result);
             return result;
         }
     }
