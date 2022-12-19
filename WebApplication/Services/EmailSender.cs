@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MailKit.Net.Smtp;
+
+using EventBus.Messages.Events.EmailEvents;
+
+using MassTransit;
+
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MimeKit;
+
 using WebApplication.Models.Settings;
 
 namespace WebApplication.Services
@@ -12,36 +16,31 @@ namespace WebApplication.Services
     public class EmailSender : IEmailSender
     {
         private readonly EmailSettings _options;
+        private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILogger<EmailSender> _logger;
 
-        public EmailSender(IOptions<EmailSettings> options, ILogger<EmailSender> logger)
+        public EmailSender(
+            IOptions<EmailSettings> options,
+            IPublishEndpoint publishEndpoint,
+            ILogger<EmailSender> logger)
         {
             _options = options.Value;
             _logger = logger;
+            _publishEndpoint = publishEndpoint;
         }
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             try
             {
-                var emailMessage = new MimeMessage();
-
-                emailMessage.From.Add(new MailboxAddress("Администрация сайта", _options.Address));
-                emailMessage.To.Add(new MailboxAddress("", email));
-                emailMessage.Subject = subject;
-                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+                var eventMessage = new EmailEvent()
                 {
-                    Text = htmlMessage
+                    Subject = subject,
+                    HtmlMessage = htmlMessage,
+                    Email = email
                 };
 
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync(_options.Host, _options.Port, true);
-                    await client.AuthenticateAsync(_options.UserName, _options.Password);
-                    await client.SendAsync(emailMessage);
-
-                    await client.DisconnectAsync(true);
-                }
+                await _publishEndpoint.Publish(eventMessage);
 
                 _logger.LogInformation($"{email}: Email sent");
             }

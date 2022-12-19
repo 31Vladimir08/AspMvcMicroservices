@@ -26,6 +26,7 @@ using WebApplication.Middleware;
 using ExchangeRatesAgainstDollar.Grpc.Protos;
 using WebApplication.GrpcServices;
 using WebApplication.Models.Settings;
+using MassTransit;
 
 namespace WebApplication
 {
@@ -46,7 +47,6 @@ namespace WebApplication
                 .Get<DbSettings>();
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
-            services.Configure<EmailSettings>(Configuration.GetSection(EmailSettings.SettingsKey));
             services.Configure<CurrensyTypes>(Configuration.GetSection("CurrensyTypes"));
             services.AddDbContextFactory<AplicationDbContext>(options =>
                 { 
@@ -64,6 +64,12 @@ namespace WebApplication
             services.AddGrpcClient<ExchangeRateService.ExchangeRateServiceClient>(
                 o => o.Address = new Uri(Configuration["GrpcSettings:CurrensyUrl"]));
             services.AddScoped<ExchangeRateGrpcService>();
+
+            services.AddMassTransit(config => {
+                config.UsingRabbitMq((ctx, cfg) => {
+                    cfg.Host(Configuration["EventBusSettings:HostAddress"]);
+                });
+            });
 
             services.AddHostedService<CacheHostedService>();
             services.AddDefaultIdentity<IdentityUser>().AddRoles<IdentityRole>()
@@ -96,7 +102,7 @@ namespace WebApplication
                     {
                         Name = "Vladimir Dolidze",
                         Email = string.Empty,
-                        Url = "https://vk.com/id52435997"
+                        Url = "http://www.linkedin.com/in/vladimir-dolidze-b07012248"
                     };
                     document.Info.License = new NSwag.OpenApiLicense
                     {
