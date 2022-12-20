@@ -1,6 +1,13 @@
 using EmailService.Entities.Settings;
+using EmailService.EventBusConsumer;
 using EmailService.Interfaces.Services;
 using EmailService.Services;
+
+using EventBus.Messages.Common;
+
+using MassTransit;
+
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders().AddFile();
@@ -10,6 +17,17 @@ builder.Logging.ClearProviders().AddFile();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.AddMassTransit(config => {
+    config.AddConsumer<EmailConsumer>();
+    config.UsingRabbitMq((ctx, cfg) => {
+        cfg.Host(builder.Configuration["EventBusSettings:HostAddress"]);
+
+        cfg.ReceiveEndpoint(EventBusConstants.EmailConfirmationOfRegistrationQueue, c => {
+            c.ConfigureConsumer<EmailConsumer>(ctx);
+        });
+    });
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

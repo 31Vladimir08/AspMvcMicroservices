@@ -15,7 +15,6 @@ namespace WebApplication.Filters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            var d = context.ModelState;
             _loger.LogInformation($"{context.ActionDescriptor.DisplayName}: START");
             await next();
             _loger.LogInformation($"{context.ActionDescriptor.DisplayName}: FINISH");
