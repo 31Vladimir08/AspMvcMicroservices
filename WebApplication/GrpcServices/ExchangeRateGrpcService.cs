@@ -5,7 +5,6 @@ using ExchangeRatesAgainstDollar.Grpc.Protos;
 
 using Microsoft.Extensions.Logging;
 
-using WebApplication.Controllers;
 using WebApplication.Models.Settings;
 
 namespace WebApplication.GrpcServices
@@ -73,7 +72,7 @@ namespace WebApplication.GrpcServices
 
         private decimal ConvertExchangeRateModelToDecimal(ExchangeRateModel model)
         {
-            var result = System.Convert.ToDecimal($"{model.Nanos}.{model.Units}");
+            _ = decimal.TryParse($"{model.Nanos}.{model.Units}", out var result);
             return result;
         }
     }
