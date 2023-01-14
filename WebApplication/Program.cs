@@ -27,7 +27,7 @@ namespace WebApplication
                     .WriteTo.Console()
                     .WriteTo.Elasticsearch(
                         new ElasticsearchSinkOptions(
-                            new Uri(context.Configuration["ElasticConfiguration:Uri"]))
+                            new Uri(context.Configuration["ElasticConfiguration:Url"]))
                         {
                             IndexFormat = $"applogs-{Assembly.GetExecutingAssembly().GetName().Name.ToLower().Replace(".","-")}-logs-{DateTime.UtcNow:yyyy-MM}",
                             AutoRegisterTemplate= true,
