@@ -9,9 +9,6 @@ using System.Threading.Tasks;
 using WebApplication.ViewModels;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using WebApplication.Models.Settings;
-using Microsoft.Extensions.Configuration;
 
 namespace WebApplication.Controllers
 {
@@ -19,15 +16,12 @@ namespace WebApplication.Controllers
     {
         private readonly ExchangeRateGrpcService _exchangeRateGrpcService;
         private readonly ILogger<HomeController> _logger;
-        private readonly CurrensyTypes _currensyTypes;
         public HomeController(
             ExchangeRateGrpcService exchangeRateGrpcService, 
-            ILogger<HomeController> logger,
-            IOptions<CurrensyTypes> currensyTypes) 
+            ILogger<HomeController> logger) 
         {
             _exchangeRateGrpcService = exchangeRateGrpcService;
             _logger = logger;
-            _currensyTypes = currensyTypes.Value;
         }
 
         [ServiceFilter(typeof(LogingCallsActionFilter))]
