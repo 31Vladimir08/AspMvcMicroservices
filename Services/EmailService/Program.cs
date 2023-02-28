@@ -1,3 +1,5 @@
+using Common.Logging;
+
 using EmailService.Entities.Settings;
 using EmailService.EventBusConsumer;
 using EmailService.Interfaces.Services;
@@ -7,10 +9,10 @@ using EventBus.Messages.Common;
 
 using MassTransit;
 
-using static Org.BouncyCastle.Math.EC.ECCurve;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Logging.ClearProviders().AddFile();
+    builder.Host.UseSerilog(SeriLogger.Configure);
 
 // Add services to the container.
 

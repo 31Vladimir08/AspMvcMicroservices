@@ -47,7 +47,6 @@ namespace WebApplication
                 .Get<DbSettings>();
             services.AddMemoryCache();
             services.Configure<DbSettings>(Configuration.GetSection(DbSettings.DbSettingsKey));
-            services.Configure<CurrensyTypes>(Configuration.GetSection("CurrensyTypes"));
             services.AddDbContextFactory<AplicationDbContext>(options =>
                 { 
                     options.UseSqlServer(Options.ConnectionString);

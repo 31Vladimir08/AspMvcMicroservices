@@ -1,8 +1,12 @@
+using Common.Logging;
+
 using ExchangeRatesAgainstDollar.Grpc.Models.Settings;
 using ExchangeRatesAgainstDollar.Grpc.Services;
 
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
-builder.Logging.ClearProviders().AddFile();
+builder.Host.UseSerilog(SeriLogger.Configure);
 
 // Additional configuration is required to successfully run gRPC on macOS.
 // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
