@@ -21,7 +21,8 @@ builder.Services.Configure<KestrelServerOptions>(options =>
     options.Limits.MaxRequestBodySize = 268435456000
 );
 
-builder.Services.AddTransient<IFileService, FileService>();
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IXmlService, XmlService>();
 
 var app = builder.Build();
 

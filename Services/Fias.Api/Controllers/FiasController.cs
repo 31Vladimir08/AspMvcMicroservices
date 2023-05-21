@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 
 using Fias.Api.Interfaces.Services;
 
@@ -14,10 +13,12 @@ namespace Fias.Api.Controllers
     public class FiasController : ControllerBase
     {
         private readonly IFileService _streamFileUploadService;
+        private readonly IXmlService _xmlService;
 
-        public FiasController(IFileService streamFileUploadService)
+        public FiasController(IFileService streamFileUploadService, IXmlService xmlService)
         {
             _streamFileUploadService = streamFileUploadService;
+            _xmlService = xmlService;
         }
 
         [HttpPost]
@@ -33,7 +34,7 @@ namespace Fias.Api.Controllers
 
             var filePath = Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "UploadedTempFiles"));
             Directory.CreateDirectory(filePath);
-            var file = await _streamFileUploadService.UploadFile(reader, filePath);
+            var file = await _streamFileUploadService.UploadFileAsync(reader, filePath);
             using (ZipArchive archive = ZipFile.OpenRead($"{filePath}\\Test.zip"))
             {
                 var i = 0;
@@ -50,7 +51,15 @@ namespace Fias.Api.Controllers
                         // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
                         // are case-insensitive.
                         if (destinationPath.StartsWith(destinationPath, StringComparison.Ordinal))
+                        {
                             entry.ExtractToFile(destinationPath);
+                            //здесь после того как файл распакован, десериализовать и записать в базу
+                            /*using (var file = new FileStream("C:\\Users\\Admin\\Desktop\\gar_xml\\AS_HOUSES_20230518_7f62269b-64e6-4773-8875-18e7720eb162.xml", FileMode.Open, FileAccess.Read))
+                            {
+                                var res = _xmlService.DeserializeFiasXml<HOUSES>(file);
+                                return Ok(res);
+                            }*/
+                        }
                     }
                     i++;
                 }

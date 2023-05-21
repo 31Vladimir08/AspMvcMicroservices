@@ -4,6 +4,6 @@ namespace Fias.Api.Interfaces.Services
 {
     public interface IFileService
     {
-        Task<(string fileName, bool isUploadFile)> UploadFile(MultipartReader reader, string filePath);
+        Task<(string fileName, bool isUploadFile)> UploadFileAsync(MultipartReader reader, string filePath);
     }
 }

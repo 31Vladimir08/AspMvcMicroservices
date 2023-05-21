@@ -9,7 +9,7 @@ namespace Fias.Api.Services
 {
     public class FileService : IFileService
     {
-        public async Task<(string fileName, bool isUploadFile)> UploadFile(MultipartReader reader, string filePath)
+        public async Task<(string fileName, bool isUploadFile)> UploadFileAsync(MultipartReader reader, string filePath)
         {
             if (reader is null)
                 return ("Test.zip", false);
