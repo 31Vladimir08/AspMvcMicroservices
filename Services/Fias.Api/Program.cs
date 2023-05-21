@@ -1,8 +1,6 @@
+using Fias.Api.AutoMapperProfile;
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Services;
-
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,14 +10,15 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(typeof(AutoMapProfiler));
 
-builder.Services.Configure<FormOptions>(options =>
+/*builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 268435456000
 );
 
 builder.Services.Configure<KestrelServerOptions>(options =>
     options.Limits.MaxRequestBodySize = 268435456000
-);
+);*/
 
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IXmlService, XmlService>();
