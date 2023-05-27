@@ -1,4 +1,6 @@
-﻿namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
+﻿using Fias.Api.Interfaces.XmlModels;
+
+namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
 {
 
     // NOTE: Generated code may require at least .NET Framework 4.5 or .NET Core/Standard 2.0.
@@ -7,7 +9,7 @@
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
-    public partial class ADDRESSOBJECTS
+    public partial class ADDRESSOBJECTS : IXmlModel
     {
 
         private ADDRESSOBJECTSOBJECT[] oBJECTField;

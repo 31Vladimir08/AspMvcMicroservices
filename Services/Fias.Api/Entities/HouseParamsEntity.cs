@@ -1,6 +1,10 @@
-﻿namespace Fias.Api.Entities
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore;
+using Fias.Api.Interfaces.Entities;
+
+namespace Fias.Api.Entities
 {
-    public class HouseParamsEntity
+    public class HouseParamsEntity : IEntity
     {
         public uint Id { get; set; }
         
@@ -19,5 +23,50 @@
         public DateTime StartDate { get; set; }
         
         public DateTime EndDate { get; set; }
+    }
+
+    public class HouseParamsEntitySQLiteConfig : IEntityTypeConfiguration<HouseParamsEntity>
+    {
+        public void Configure(EntityTypeBuilder<HouseParamsEntity> builder)
+        {
+            builder.ToTable("AS_HOUSES_PARAMS")
+                .HasKey(x => x.Id);
+
+            builder.Property(s => s.Id)
+                .HasColumnName("ID")
+                .HasColumnType("INTEGER");
+            builder.Property(s => s.ObjectId)
+                .HasColumnName("OBJECTID")
+                .HasColumnType("INTEGER")
+                .IsRequired();
+            builder.Property(s => s.ChangeId)
+                .HasColumnName("CHANGEID")
+                .HasColumnType("INTEGER")
+                .IsRequired();
+            builder.Property(s => s.ChangeIdEnd)
+                .HasColumnName("CHANGEIDEND")
+                .HasColumnType("INTEGER")
+                .IsRequired();
+            builder.Property(s => s.TypeId)
+                .HasColumnName("TYPEID")
+                .HasColumnType("INTEGER")
+                .IsRequired();
+            builder.Property(s => s.Value)
+                .HasColumnName("VALUE")
+                .HasColumnType("TEXT")
+                .IsRequired();
+            builder.Property(s => s.UpdateDate)
+                .HasColumnName("UPDATEDATE")
+                .HasColumnType("TEXT")
+                .IsRequired();
+            builder.Property(s => s.StartDate)
+                .HasColumnName("STARTDATE")
+                .HasColumnType("TEXT")
+                .IsRequired();
+            builder.Property(s => s.EndDate)
+                .HasColumnName("ENDDATE")
+                .HasColumnType("TEXT")
+                .IsRequired();
+        }
     }
 }
