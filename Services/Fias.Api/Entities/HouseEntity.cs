@@ -44,7 +44,8 @@ namespace Fias.Api.Entities
     {
         public void Configure(EntityTypeBuilder<HouseEntity> builder)
         {
-            builder.ToTable("AS_HOUSES");
+            builder.ToTable("AS_HOUSES")
+                .HasKey(x => x.Id);
             builder.HasIndex(x => x.Id)
                 .IsUnique();
 
@@ -119,9 +120,8 @@ namespace Fias.Api.Entities
     {
         public void Configure(EntityTypeBuilder<HouseEntity> builder)
         {
-            builder.ToTable("AS_HOUSES");
-            builder.HasIndex(x => x.Id)
-                .IsUnique();
+            builder.ToTable("AS_HOUSES", "dbo")
+                .HasKey(x => x.Id);
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")

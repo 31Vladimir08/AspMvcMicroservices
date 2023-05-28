@@ -51,82 +51,73 @@ namespace Fias.Api.Services
             return isTypeExist ? type : XmlModelType.Unknown;
         }
 
-        public async Task RemoveAllXmlTableAsync(AppDbContext dbContext)
+        public async Task RemoveAllXmlTableAsync()
         {
-            await _baseRepository.DeleteAllEntitiesAsync<HouseEntity>(dbContext);
-            await _baseRepository.DeleteAllEntitiesAsync<HouseParamsEntity>(dbContext);
-            await _baseRepository.DeleteAllEntitiesAsync<ParamTypesEntity>(dbContext);
-            await _baseRepository.DeleteAllEntitiesAsync<AddrObjEntity>(dbContext);
-            await _baseRepository.DeleteAllEntitiesAsync<AddrObjParamEntity>(dbContext);
+            await _baseRepository.DeleteAllEntitiesAsync<HouseEntity>();
+            await _baseRepository.DeleteAllEntitiesAsync<HouseParamsEntity>();
+            await _baseRepository.DeleteAllEntitiesAsync<ParamTypesEntity>();
+            await _baseRepository.DeleteAllEntitiesAsync<AddrObjEntity>();
+            await _baseRepository.DeleteAllEntitiesAsync<AddrObjParamEntity>();
         }
 
-        public async Task InsertToDbFromXmlFileAsync(TempFile tempXml, AppDbContext context, bool isRestoreDb = false)
+        public async Task InsertToDbFromXmlFileAsync(TempFile tempXml, bool isRestoreDb = false)
         {
             if (string.IsNullOrWhiteSpace(tempXml.FullFilePath))
                 return;
             var xmlModelType = GetXmlModelTypeFromXmlFile(tempXml.OriginFileName);
             using (var file = new FileStream(tempXml.FullFilePath, FileMode.Open, FileAccess.Read))
             {
-                try
+                switch (xmlModelType)
                 {
-                    switch (xmlModelType)
-                    {
-                        case XmlModelType.Houses:
-                            {
-                                var model = DeserializeFiasXml<HOUSES>(file);
-                                var entities = model?.HOUSE?.AsParallel().Select(_mapper.Map<HouseEntity>).ToList();
-                                await InsertsOrUpdatesAsync(entities, context, isRestoreDb);
-                                break;
-                            }
-                        case XmlModelType.HousesParams:
-                            {
-                                var model = DeserializeFiasXml<PARAMS>(file);
-                                var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<HouseParamsEntity>).ToList();
-                                await InsertsOrUpdatesAsync(entities, context, isRestoreDb);
-                                break;
-                            }
+                    case XmlModelType.Houses:
+                        {
+                            var model = DeserializeFiasXml<HOUSES>(file);
+                            var entities = model?.HOUSE?.AsParallel().Select(_mapper.Map<HouseEntity>).ToList();
+                            await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                            break;
+                        }
+                    case XmlModelType.HousesParams:
+                        {
+                            var model = DeserializeFiasXml<PARAMS>(file);
+                            var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<HouseParamsEntity>).ToList();
+                            await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                            break;
+                        }
 
-                        case XmlModelType.ParamTypes:
-                            {
-                                var model = DeserializeFiasXml<PARAMTYPES>(file);
-                                var entities = model?.PARAMTYPE?.AsParallel().Select(_mapper.Map<ParamTypesEntity>).ToList();
-                                await InsertsOrUpdatesAsync(entities, context, isRestoreDb);
-                                break;
-                            }
-                        case XmlModelType.AddrObj:
-                            {
-                                var model = DeserializeFiasXml<ADDRESSOBJECTS>(file);
-                                var entities = model?.OBJECT?.AsParallel().Select(_mapper.Map<AddrObjEntity>).ToList();
-                                await InsertsOrUpdatesAsync(entities, context, isRestoreDb);
-                                break;
-                            }
-                        case XmlModelType.AddrObjParams:
-                            {
-                                var model = DeserializeFiasXml<Models.FiasModels.XmlModels.AddrObjParams.PARAMS>(file);
-                                var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<AddrObjParamEntity>).ToList();
-                                await InsertsOrUpdatesAsync(entities, context, isRestoreDb);
-                                break;
-                            }
-                    }
-                }
-                catch (Exception ex)
-                {
-
+                    case XmlModelType.ParamTypes:
+                        {
+                            var model = DeserializeFiasXml<PARAMTYPES>(file);
+                            var entities = model?.PARAMTYPE?.AsParallel().Select(_mapper.Map<ParamTypesEntity>).ToList();
+                            await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                            break;
+                        }
+                    case XmlModelType.AddrObj:
+                        {
+                            var model = DeserializeFiasXml<ADDRESSOBJECTS>(file);
+                            var entities = model?.OBJECT?.AsParallel().Select(_mapper.Map<AddrObjEntity>).ToList();
+                            await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                            break;
+                        }
+                    case XmlModelType.AddrObjParams:
+                        {
+                            var model = DeserializeFiasXml<Models.FiasModels.XmlModels.AddrObjParams.PARAMS>(file);
+                            var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<AddrObjParamEntity>).ToList();
+                            await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                            break;
+                        }
                 }
             }
-
         }
 
-        private async Task InsertsOrUpdatesAsync<TEntity>(List<TEntity>? entities, AppDbContext context, bool isRestoreDb = false) where TEntity : BaseEntity
+        private async Task InsertsOrUpdatesAsync<TEntity>(List<TEntity>? entities, bool isRestoreDb = false) where TEntity : BaseEntity
         {
             if (isRestoreDb)
             {
-                await _baseRepository.InsertsAsync(entities, context);
-
+                await _baseRepository.InsertsAsync(entities);
             }
             else
             {
-                await _baseRepository.InsertsOrUpdatesAsync(entities, context);
+                await _baseRepository.InsertsOrUpdatesAsync(entities);
             }
         }
 

@@ -9,7 +9,7 @@ namespace Fias.Api.Interfaces.Services
     {
         T? DeserializeFiasXml<T>(FileStream xmlFile) where T : class, IXmlModel;
         XmlModelType GetXmlModelTypeFromXmlFile(string xmlFileName);
-        Task InsertToDbFromXmlFileAsync(TempFile tempXml, AppDbContext context, bool isRestoreDb = false);
-        Task RemoveAllXmlTableAsync(AppDbContext dbContext);
+        Task InsertToDbFromXmlFileAsync(TempFile tempXml, bool isRestoreDb = false);
+        Task RemoveAllXmlTableAsync();
     }
 }

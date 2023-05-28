@@ -13,81 +13,73 @@ namespace Fias.Api.Services
     public class FileService : IFileService
     {
         private readonly IXmlService _xmlService;
-        private readonly IDbContextFactory<AppDbContext> _contextFactory;
+        private readonly AppDbContext _dbContext;
 
         public FileService(
             IXmlService xmlService,
-            IDbContextFactory<AppDbContext> contextFactory) 
+            AppDbContext dbContext) 
         {
             _xmlService = xmlService ?? throw new ArgumentNullException(nameof(xmlService));
-            _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task InsertToDbFromUploadedFileAsync(TempFile uploadFile, bool isRestoreDb = false)
         {
-            using (var context = _contextFactory.CreateDbContext())
+            await _dbContext.Database.BeginTransactionAsync();
+
+            if (isRestoreDb)
             {
-                await context.Database.BeginTransactionAsync();
+                await _xmlService.RemoveAllXmlTableAsync();
+            }
 
-                if (isRestoreDb)
+            var fileExtencion = Path.GetExtension(uploadFile.OriginFileName)?.ToLower();
+            if (fileExtencion == ".xml")
+            {
+                await _xmlService.InsertToDbFromXmlFileAsync(uploadFile, isRestoreDb);
+            }
+            else if (fileExtencion == ".zip")
+            {
+                using (ZipArchive archive = ZipFile.OpenRead(uploadFile.FullFilePath))
                 {
-                    await _xmlService.RemoveAllXmlTableAsync(context);
-                }
-
-                var fileExtencion = Path.GetExtension(uploadFile.OriginFileName)?.ToLower();
-                if (fileExtencion == ".xml")
-                {
-                    await _xmlService.InsertToDbFromXmlFileAsync(uploadFile, context, isRestoreDb);
-                }
-                else if (fileExtencion == ".zip")
-                {
-                    using (ZipArchive archive = ZipFile.OpenRead(uploadFile.FullFilePath))
+                    foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        foreach (ZipArchiveEntry entry in archive.Entries)
+                        // Gets the full path to ensure that relative segments are removed.
+                        var destinationPath = Path.Combine(
+                            $"{Path.GetDirectoryName(uploadFile.FullFilePath)}\\{Path.GetFileNameWithoutExtension(uploadFile.FullFilePath)}",
+                            Path.GetRandomFileName());
+                        var directory = Path.GetDirectoryName(destinationPath);
+                        if (!Directory.Exists(directory) && !string.IsNullOrWhiteSpace(directory))
+                            Directory.CreateDirectory(directory);
+
+                        if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                         {
-                            // Gets the full path to ensure that relative segments are removed.
-                            var destinationPath = Path.Combine(
-                                $"{Path.GetDirectoryName(uploadFile.FullFilePath)}\\{Path.GetFileNameWithoutExtension(uploadFile.FullFilePath)}",
-                                Path.GetRandomFileName());
-                            var directory = Path.GetDirectoryName(destinationPath);
-                            if (!Directory.Exists(directory) && !string.IsNullOrWhiteSpace(directory))
-                                Directory.CreateDirectory(directory);
-
-                            if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                            // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
+                            // are case-insensitive.
+                            if (destinationPath.StartsWith(destinationPath, StringComparison.Ordinal))
                             {
-                                // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
-                                // are case-insensitive.
-                                if (destinationPath.StartsWith(destinationPath, StringComparison.Ordinal))
-                                {
-                                    entry.ExtractToFile(destinationPath);
-                                    await _xmlService.InsertToDbFromXmlFileAsync(new TempFile(destinationPath, entry.Name), context, isRestoreDb);
-                                }
+                                entry.ExtractToFile(destinationPath);
+                                await _xmlService.InsertToDbFromXmlFileAsync(new TempFile(destinationPath, entry.Name), isRestoreDb);
                             }
-                            else if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
-                            {
-
-                            }
-
-                            File.Delete(destinationPath);
                         }
+                        else if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                        {
+
+                        }
+
+                        File.Delete(destinationPath);
                     }
                 }
-                else if (fileExtencion == ".txt")
-                {
-
-                }
-                else
-                {
-
-                }
-
-                await context.Database.CommitTransactionAsync();
             }
-            
-            
+            else if (fileExtencion == ".txt")
+            {
 
-            
-            
+            }
+            else
+            {
+
+            }
+
+            await _dbContext.Database.CommitTransactionAsync();
         }
 
         public async Task<List<TempFile>> UploadFileAsync(MultipartReader reader, string directory)

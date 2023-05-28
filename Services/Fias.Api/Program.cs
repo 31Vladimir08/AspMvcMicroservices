@@ -20,8 +20,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<DbSettingsOption>(builder.Configuration.GetSection("DbSettings"));
 builder.Services.AddAutoMapper(typeof(AutoMapProfiler));
-builder.Services.AddDbContextFactory<AppDbContext>();
-//builder.Services.AddDbContext<AppDbContext>();
+//builder.Services.AddDbContextFactory<AppDbContext>();
+builder.Services.AddDbContext<AppDbContext>();
 
 //TODO надо чето с этой хуйней придумать
 builder.Services.Configure<FormOptions>(options =>
