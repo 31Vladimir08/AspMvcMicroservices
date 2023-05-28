@@ -8,35 +8,22 @@ using Microsoft.Extensions.Options;
 
 namespace Fias.Api.Contexts
 {
-    public class AppDbContext : DbContext, IDbContext
+    public class AppDbContext : DbContext
     {
         private readonly DbSettingsOption _dbOptions;
         public AppDbContext(DbContextOptions<AppDbContext> options, IOptions<DbSettingsOption> dbOptions)
             : base(options)
         {
             _dbOptions = dbOptions.Value;
-            switch (_dbOptions.TypeDb)
-            {
-                case SupportedDb.SQLite:
-                    SQLitePCL.Batteries.Init();
-                    break;
-                default:
-                    throw new InvalidOperationException();
-            }
-            //
+            Database.EnsureCreated();
         }
 
-        /*public DbSet<AddrObjEntity> AddrObjects { get; set; }
-        public DbSet<AddrObjParamEntity> AddrObjectParams { get; set; }
-        public DbSet<HouseEntity> Houses { get; set; }
-        public DbSet<HouseParamsEntity> HouseParamsEntity { get; set; }
-        public DbSet<ParamTypesEntity> ParamTypesEntity { get; set; }*/
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             switch (_dbOptions.TypeDb)
             {
                 case SupportedDb.SQLite:
-                    optionsBuilder.UseSqlite();
+                    optionsBuilder.UseSqlite(_dbOptions.ConnectionString);
                     break;
                 default:
                     throw new InvalidOperationException();

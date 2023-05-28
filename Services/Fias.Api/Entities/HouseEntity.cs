@@ -1,13 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using Fias.Api.Interfaces.Entities;
 
 namespace Fias.Api.Entities
 {
-    public class HouseEntity : IEntity
+    public class HouseEntity : BaseEntity
     {
-        public uint Id { get; set; }
-        
         public uint ObjectId { get; set; }
         
         public string ObjectGuid { get; set; }
@@ -34,7 +31,7 @@ namespace Fias.Api.Entities
         
         public byte IsActive { get; set; }
         
-        public byte AddNum1 { get; set; }
+        public string? AddNum1 { get; set; }
         
         public bool AddNum1Specified { get; set; }
         
@@ -49,8 +46,8 @@ namespace Fias.Api.Entities
         {
             builder.ToTable("AS_HOUSES")
                 .HasKey(x => x.Id);
-            builder.HasIndex(x => x.ObjectId);
-            builder.HasIndex(x => x.ObjectGuid);
+            builder.HasIndex(x => x.Id)
+                /*.IsUnique()*/;
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
@@ -96,10 +93,12 @@ namespace Fias.Api.Entities
             builder.Property(s => s.StartDate)
                 .HasColumnName("STARTDATE")
                 .HasColumnType("TEXT")
+                .HasMaxLength(200)
                 .IsRequired();
             builder.Property(s => s.EndDate)
                 .HasColumnName("ENDDATE")
                 .HasColumnType("TEXT")
+                .HasMaxLength(200)
                 .IsRequired();
             builder.Property(s => s.IsActual)
                 .HasColumnName("ISACTUAL")
@@ -109,6 +108,10 @@ namespace Fias.Api.Entities
                 .HasColumnName("ISACTIVE")
                 .HasColumnType("INTEGER")
                 .IsRequired();
+            builder.Property(s => s.AddNum1)
+                .HasColumnName("ADDNUM1")
+                .HasColumnType("TEXT")
+                .HasMaxLength(200);
         }
     }
 }

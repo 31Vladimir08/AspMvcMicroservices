@@ -2,8 +2,10 @@ using Fias.Api.AutoMapperProfile;
 using Fias.Api.Contexts;
 using Fias.Api.Extensions;
 using Fias.Api.Interfaces;
+using Fias.Api.Interfaces.Repositories;
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Models.Options.DataBase;
+using Fias.Api.Repositories;
 using Fias.Api.Services;
 
 using Microsoft.AspNetCore.Http.Features;
@@ -29,9 +31,11 @@ builder.Services.Configure<KestrelServerOptions>(options =>
     options.Limits.MaxRequestBodySize = 268435456000
 );
 
+builder.Services.AddScoped<AppDbContext>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IXmlService, XmlService>();
-builder.Services.AddScoped<IDbContext, AppDbContext>();
+
+builder.Services.AddScoped<IBaseRepository, BaseRepository>();
 
 var app = builder.Build();
 

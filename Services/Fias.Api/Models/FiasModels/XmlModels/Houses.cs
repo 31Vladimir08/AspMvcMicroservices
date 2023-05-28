@@ -2,7 +2,6 @@
 
 namespace Fias.Api.Models.FiasModels.XmlModels.Houses
 {
-
     // NOTE: Generated code may require at least .NET Framework 4.5 or .NET Core/Standard 2.0.
     /// <remarks/>
     [System.SerializableAttribute()]
@@ -66,7 +65,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
 
         private byte iSACTIVEField;
 
-        private byte aDDNUM1Field;
+        private string aDDNUM1Field;
 
         private bool aDDNUM1FieldSpecified;
 
@@ -286,7 +285,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte ADDNUM1
+        public string ADDNUM1
         {
             get
             {

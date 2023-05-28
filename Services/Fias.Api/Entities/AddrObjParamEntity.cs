@@ -1,13 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using Fias.Api.Interfaces.Entities;
 
 namespace Fias.Api.Entities
 {
-    public class AddrObjParamEntity : IEntity
+    public class AddrObjParamEntity : BaseEntity
     {
-        public uint Id { get; set; }
-        
         public uint ObjectId { get; set; }
         
         public uint ChangeId { get; set; }
@@ -31,7 +28,8 @@ namespace Fias.Api.Entities
         {
             builder.ToTable("AS_ADDR_OBJ_PARAMS")
                 .HasKey(x => x.Id);
-            builder.HasIndex(x => x.ObjectId);
+            builder.HasIndex(x => x.Id)
+                /*.IsUnique()*/;
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
@@ -55,18 +53,22 @@ namespace Fias.Api.Entities
             builder.Property(s => s.Value)
                 .HasColumnName("VALUE")
                 .HasColumnType("TEXT")
+                .HasMaxLength(200)
                 .IsRequired();
             builder.Property(s => s.UpdateDate)
                 .HasColumnName("UPDATEDATE")
                 .HasColumnType("TEXT")
+                .HasMaxLength(200)
                 .IsRequired();
             builder.Property(s => s.StartDate)
                 .HasColumnName("STARTDATE")
                 .HasColumnType("TEXT")
+                .HasMaxLength(200)
                 .IsRequired();
             builder.Property(s => s.EndDate)
                 .HasColumnName("ENDDATE")
                 .HasColumnType("TEXT")
+                .HasMaxLength(200)
                 .IsRequired();
         }
     }

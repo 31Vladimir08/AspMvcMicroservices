@@ -1,18 +1,36 @@
 ﻿using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
+using AutoMapper;
+
 using Fias.Api.Enums;
+using Fias.Api.Interfaces.Repositories;
+using Fias.Api.Interfaces;
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Interfaces.XmlModels;
+using Fias.Api.Models.File;
+using Fias.Api.Entities;
+using Fias.Api.Models.FiasModels.XmlModels.AddrObj;
+using Fias.Api.Models.FiasModels.XmlModels.Houses;
+using Fias.Api.Models.FiasModels.XmlModels.ParamTypes;
+using Fias.Api.Models.FiasModels.XmlModels.HousesParams;
+using Fias.Api.Repositories;
 
 namespace Fias.Api.Services
 {
     public class XmlService : IXmlService
     {
         private Dictionary <string, XmlModelType> _attributes;
+        private readonly IMapper _mapper;
 
-        public XmlService()
+        private IBaseRepository _baseRepository;
+
+        public XmlService(
+            IMapper mapper,
+            IBaseRepository baseRepository)
         {
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _baseRepository = baseRepository ?? throw new ArgumentNullException(nameof(baseRepository));
             _attributes = GetXmlDictionary();
         }
 
@@ -33,6 +51,85 @@ namespace Fias.Api.Services
 
             var isTypeExist =_attributes.TryGetValue(fileName, out var type);
             return isTypeExist ? type : XmlModelType.Unknown;
+        }
+
+        public async Task RemoveAllXmlTableAsync()
+        {
+            await _baseRepository.DeleteAllEntitiesAsync<HouseEntity>();
+            await _baseRepository.DeleteAllEntitiesAsync<HouseParamsEntity>();
+            await _baseRepository.DeleteAllEntitiesAsync<ParamTypesEntity>();
+            await _baseRepository.DeleteAllEntitiesAsync<AddrObjEntity>();
+            await _baseRepository.DeleteAllEntitiesAsync<AddrObjParamEntity>();
+        }
+
+        public async Task InsertToDbFromXmlFileAsync(TempFile tempXml, bool isRestoreDb = false)
+        {
+            if (string.IsNullOrWhiteSpace(tempXml.FullFilePath))
+                return;
+            var xmlModelType = GetXmlModelTypeFromXmlFile(tempXml.OriginFileName);
+            using (var file = new FileStream(tempXml.FullFilePath, FileMode.Open, FileAccess.Read))
+            {
+                try
+                {
+                    switch (xmlModelType)
+                    {
+                        case XmlModelType.Houses:
+                            {
+                                var model = DeserializeFiasXml<HOUSES>(file);
+                                var entities = model?.HOUSE?.AsParallel().Select(_mapper.Map<HouseEntity>).ToList();
+                                await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                                break;
+                            }
+                        case XmlModelType.HousesParams:
+                            {
+                                var model = DeserializeFiasXml<PARAMS>(file);
+                                var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<HouseParamsEntity>).ToList();
+                                await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                                break;
+                            }
+
+                        case XmlModelType.ParamTypes:
+                            {
+                                var model = DeserializeFiasXml<PARAMTYPES>(file);
+                                var entities = model?.PARAMTYPE?.AsParallel().Select(_mapper.Map<ParamTypesEntity>).ToList();
+                                await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                                break;
+                            }
+                        case XmlModelType.AddrObj:
+                            {
+                                var model = DeserializeFiasXml<ADDRESSOBJECTS>(file);
+                                var entities = model?.OBJECT?.AsParallel().Select(_mapper.Map<AddrObjEntity>).ToList();
+                                await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                                break;
+                            }
+                        case XmlModelType.AddrObjParams:
+                            {
+                                var model = DeserializeFiasXml<Models.FiasModels.XmlModels.AddrObjParams.PARAMS>(file);
+                                var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<AddrObjParamEntity>).ToList();
+                                await InsertsOrUpdatesAsync(entities, isRestoreDb);
+                                break;
+                            }
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+
+        }
+
+        private async Task InsertsOrUpdatesAsync<TEntity>(List<TEntity>? entities, bool isRestoreDb = false) where TEntity : BaseEntity
+        {
+            if (isRestoreDb)
+            {
+                await _baseRepository.InsertsAsync(entities);
+
+            }
+            else
+            {
+                await _baseRepository.InsertsOrUpdatesAsync(entities);
+            }
         }
 
         private Dictionary<string, XmlModelType> GetXmlDictionary()
