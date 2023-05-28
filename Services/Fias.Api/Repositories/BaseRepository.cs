@@ -1,44 +1,54 @@
-﻿using Fias.Api.Contexts;
+﻿using System.Collections.Generic;
+
+using Fias.Api.Contexts;
 using Fias.Api.Entities;
 using Fias.Api.Interfaces.Repositories;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Fias.Api.Repositories
 {
     public class BaseRepository : IBaseRepository
     {
-        private readonly AppDbContext _dbContext;
-
-        public BaseRepository(AppDbContext dbContext) 
+        public BaseRepository() 
         {
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public async Task DeleteAllEntitiesAsync<TEntity>() where TEntity : BaseEntity
+        public async Task DeleteAllEntitiesAsync<TEntity>(AppDbContext dbContext) where TEntity : BaseEntity
         {
-            _dbContext.Set<TEntity>().RemoveRange(_dbContext.Set<TEntity>());
-            await _dbContext.SaveChangesAsync();
+            dbContext.Set<TEntity>().RemoveRange(dbContext.Set<TEntity>());
+            await dbContext.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync<TEntity>(TEntity entity) where TEntity : BaseEntity
+        public async Task DeleteAsync<TEntity>(TEntity entity, AppDbContext dbContext) where TEntity : BaseEntity
         {
-            _dbContext.Set<TEntity>().Remove(entity);
-            await _dbContext.SaveChangesAsync();
+            dbContext.Set<TEntity>().Remove(entity);
+            await dbContext.SaveChangesAsync();
         }
 
-        public async Task InsertsAsync<TEntity>(List<TEntity>? entities) where TEntity : BaseEntity
+        public async Task InsertsAsync<TEntity>(List<TEntity>? entities, AppDbContext dbContext) where TEntity : BaseEntity
         {
             if (entities is null || entities.Count == 0)
             {
                 return;
             }
 
-            await _dbContext.Set<TEntity>().AddRangeAsync(entities);
-            await _dbContext.SaveChangesAsync();
+            var tableName = dbContext.Model.FindEntityType(typeof(TEntity))?.GetTableName();
+            if (!string.IsNullOrEmpty(tableName))
+            {
+                dbContext.Set<TEntity>().FromSqlRaw($"SET IDENTITY_INSERT dbo.{tableName} ON;");
+            }
+            await dbContext.Set<TEntity>().AddRangeAsync(entities);
+            await dbContext.SaveChangesAsync();
+
+            if (!string.IsNullOrEmpty(tableName))
+            {
+                dbContext.Set<TEntity>().FromSqlRaw($"SET IDENTITY_INSERT dbo.{tableName} OFF;");
+            }
         }
 
-        public async Task InsertsOrUpdatesAsync<TEntity>(List<TEntity>? entities) where TEntity : BaseEntity
+        public async Task InsertsOrUpdatesAsync<TEntity>(List<TEntity>? entities, AppDbContext dbContext) where TEntity : BaseEntity
         {
             if (entities is null || entities.Count == 0)
             {
@@ -47,33 +57,42 @@ namespace Fias.Api.Repositories
 
             try
             {
-                _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-
-                entities.ForEach(async entity =>
+                dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+                var tableName = dbContext.Model.FindEntityType(typeof(TEntity))?.GetTableName();
+                if (!string.IsNullOrEmpty(tableName))
                 {
-                    if (await _dbContext.Set<TEntity>()
+                    dbContext.Database.ExecuteSqlRaw($"SET IDENTITY_INSERT dbo.{tableName} ON;");
+                }
+
+                foreach ( var entity in entities )
+                {
+                    if (await dbContext.Set<TEntity>()
                     .AsNoTracking().AnyAsync(q => q.Id == entity.Id))
                     {
-                        _dbContext.Set<TEntity>().Update(entity);
+                        dbContext.Set<TEntity>().Update(entity);
                     }
                     else
                     {
-                        _dbContext.Set<TEntity>().Add(entity);
+                        dbContext.Set<TEntity>().Add(entity);
                     }
-                });
-
-                await _dbContext.SaveChangesAsync();
+                }
+                
+                await dbContext.SaveChangesAsync();
+                if (!string.IsNullOrEmpty(tableName))
+                {
+                    dbContext.Database.ExecuteSqlRaw($"SET IDENTITY_INSERT dbo.{tableName} OFF;");
+                }
             }
             finally
             {
-                _dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
+                dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
             }
         }
 
-        public async Task UpdateAsync<TEntity>(TEntity entity) where TEntity : BaseEntity
+        public async Task UpdateAsync<TEntity>(TEntity entity, AppDbContext dbContext) where TEntity : BaseEntity
         {
-            _dbContext.Set<TEntity>().Update(entity);
-            await _dbContext.SaveChangesAsync();
+            dbContext.Set<TEntity>().Update(entity);
+            await dbContext.SaveChangesAsync();
         }
     }
 }

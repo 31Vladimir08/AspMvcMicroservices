@@ -24,6 +24,9 @@ namespace Fias.Api.Contexts
                 case SupportedDb.SQLite:
                     optionsBuilder.UseSqlite(_dbOptions.ConnectionString);
                     break;
+                case SupportedDb.MSSQL:
+                    optionsBuilder.UseSqlServer(_dbOptions.ConnectionString);
+                    break;
                 default:
                     throw new InvalidOperationException();
             }
@@ -37,6 +40,9 @@ namespace Fias.Api.Contexts
                 case SupportedDb.SQLite:
                     OnSQLiteModelCreating(modelBuilder);
                     break;
+                case SupportedDb.MSSQL:
+                    OnMSSQLModelCreating(modelBuilder);
+                    break;
                 default:
                     throw new InvalidOperationException();
             }
@@ -49,6 +55,15 @@ namespace Fias.Api.Contexts
             modelBuilder.ApplyConfiguration(new HouseEntitySQLiteConfig());
             modelBuilder.ApplyConfiguration(new HouseParamsEntitySQLiteConfig());
             modelBuilder.ApplyConfiguration(new ParamTypesEntitySQLiteConfig());
+        }
+
+        private void OnMSSQLModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new AddrObjEntityMSSQLConfig());
+            modelBuilder.ApplyConfiguration(new AddrObjParamEntityMSSQLConfig());
+            modelBuilder.ApplyConfiguration(new HouseEntityMSSQLConfig());
+            modelBuilder.ApplyConfiguration(new HouseParamsEntityMSSQLConfig());
+            modelBuilder.ApplyConfiguration(new ParamTypesEntityMSSQLConfig());
         }
     }
 }

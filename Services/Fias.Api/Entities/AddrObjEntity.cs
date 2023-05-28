@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fias.Api.Entities
 {
@@ -38,8 +39,7 @@ namespace Fias.Api.Entities
     {
         public void Configure(EntityTypeBuilder<AddrObjEntity> builder)
         {
-            builder.ToTable("AS_ADDR_OBJ")
-                .HasKey(x => x.Id);
+            builder.ToTable("AS_ADDR_OBJ");
             builder.HasIndex(x => x.Id)
                 .IsUnique();
 
@@ -98,6 +98,7 @@ namespace Fias.Api.Entities
             builder.Property(s => s.EndDate)
                 .HasColumnName("ENDDATE")
                 .HasColumnType("TEXT")
+                .HasMaxLength(200)
                 .IsRequired();
             builder.Property(s => s.IsActual)
                 .HasColumnName("ISACTUAL")
@@ -106,6 +107,79 @@ namespace Fias.Api.Entities
             builder.Property(s => s.IsActive)
                 .HasColumnName("ISACTIVE")
                 .HasColumnType("INTEGER")
+                .IsRequired();
+        }
+    }
+
+    public class AddrObjEntityMSSQLConfig : IEntityTypeConfiguration<AddrObjEntity>
+    {
+        public void Configure(EntityTypeBuilder<AddrObjEntity> builder)
+        {
+            builder.ToTable("AS_ADDR_OBJ");
+            builder.HasIndex(x => x.Id)
+                .IsUnique();
+
+            builder.Property(s => s.Id)
+                .HasColumnName("ID")
+                .HasColumnType("INT");
+            builder.Property(s => s.ObjectId)
+                .HasColumnName("OBJECTID")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.ObjectGuid)
+                .HasColumnName("OBJECTGUID")
+                .HasColumnType("NVARCHAR(200)")
+                .HasMaxLength(200)
+                .IsRequired();
+            builder.Property(s => s.ChangeId)
+                .HasColumnName("CHANGEID")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.Name)
+                .HasColumnName("NAME")
+                .HasColumnType("NVARCHAR(200)")
+                .HasMaxLength(200)
+                .IsRequired();
+            builder.Property(s => s.TypeName)
+                .HasColumnName("TYPENAME")
+                .HasColumnType("NVARCHAR(200)")
+                .HasMaxLength(200)
+                .IsRequired();
+            builder.Property(s => s.Level)
+                .HasColumnName("LEVEL")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.OperTypeId)
+                .HasColumnName("OPERTYPEID")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.PrevId)
+                .HasColumnName("PREVID")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.NextId)
+                .HasColumnName("NEXTID")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.UpdateDate)
+                .HasColumnName("UPDATEDATE")
+                .HasColumnType("DATETIME")
+                .IsRequired();
+            builder.Property(s => s.StartDate)
+                .HasColumnName("STARTDATE")
+                .HasColumnType("DATETIME")
+                .IsRequired();
+            builder.Property(s => s.EndDate)
+                .HasColumnName("ENDDATE")
+                .HasColumnType("DATETIME")
+                .IsRequired();
+            builder.Property(s => s.IsActual)
+                .HasColumnName("ISACTUAL")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.IsActive)
+                .HasColumnName("ISACTIVE")
+                .HasColumnType("INT")
                 .IsRequired();
         }
     }

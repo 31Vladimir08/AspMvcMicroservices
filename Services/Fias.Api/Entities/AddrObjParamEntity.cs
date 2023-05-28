@@ -26,8 +26,7 @@ namespace Fias.Api.Entities
     {
         public void Configure(EntityTypeBuilder<AddrObjParamEntity> builder)
         {
-            builder.ToTable("AS_ADDR_OBJ_PARAMS")
-                .HasKey(x => x.Id);
+            builder.ToTable("AS_ADDR_OBJ_PARAMS");
             builder.HasIndex(x => x.Id)
                 .IsUnique();
 
@@ -69,6 +68,53 @@ namespace Fias.Api.Entities
                 .HasColumnName("ENDDATE")
                 .HasColumnType("TEXT")
                 .HasMaxLength(200)
+                .IsRequired();
+        }
+    }
+
+    public class AddrObjParamEntityMSSQLConfig : IEntityTypeConfiguration<AddrObjParamEntity>
+    {
+        public void Configure(EntityTypeBuilder<AddrObjParamEntity> builder)
+        {
+            builder.ToTable("AS_ADDR_OBJ_PARAMS");
+            builder.HasIndex(x => x.Id)
+                .IsUnique();
+
+            builder.Property(s => s.Id)
+                .HasColumnName("ID")
+                .HasColumnType("INT");
+            builder.Property(s => s.ObjectId)
+                .HasColumnName("OBJECTID")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.ChangeId)
+                .HasColumnName("CHANGEID")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.ChangeIdEnd)
+                .HasColumnName("CHANGEIDEND")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.TypeId)
+                .HasColumnName("TYPEID")
+                .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.Value)
+                .HasColumnName("VALUE")
+                .HasColumnType("NVARCHAR(200)")
+                .HasMaxLength(200)
+                .IsRequired();
+            builder.Property(s => s.UpdateDate)
+                .HasColumnName("UPDATEDATE")
+                .HasColumnType("DATETIME")
+                .IsRequired();
+            builder.Property(s => s.StartDate)
+                .HasColumnName("STARTDATE")
+                .HasColumnType("DATETIME")
+                .IsRequired();
+            builder.Property(s => s.EndDate)
+                .HasColumnName("ENDDATE")
+                .HasColumnType("DATETIME")
                 .IsRequired();
         }
     }

@@ -32,10 +32,10 @@ namespace Fias.Api.Controllers
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
 
             var originFileNames = await _fileUploadService.UploadFileAsync(reader, Asp.GetTempPath());
-            originFileNames.ForEach(async file =>
+            foreach ( var file in originFileNames)
             {
                 await _fileUploadService.InsertToDbFromUploadedFileAsync(file);
-            });
+            }
 
             return Ok();
         }
@@ -51,11 +51,11 @@ namespace Fias.Api.Controllers
                 ).Value ?? throw new UserException("JDJSLSLS");
 
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-            var originFileName = await _fileUploadService.UploadFileAsync(reader, Asp.GetTempPath());
-            originFileName.ForEach(async file =>
+            var originFileNames = await _fileUploadService.UploadFileAsync(reader, Asp.GetTempPath());
+            foreach (var file in originFileNames)
             {
                 await _fileUploadService.InsertToDbFromUploadedFileAsync(file, true);
-            });
+            }
 
             return Ok();
         }
