@@ -2,7 +2,6 @@
 
 namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
 {
-
     // NOTE: Generated code may require at least .NET Framework 4.5 or .NET Core/Standard 2.0.
     /// <remarks/>
     [System.SerializableAttribute()]
@@ -11,7 +10,6 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
     public partial class PARAMS : IXmlModel
     {
-
         private PARAMSPARAM[] pARAMField;
 
         /// <remarks/>
@@ -180,6 +178,4 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
             }
         }
     }
-
-
 }

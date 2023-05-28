@@ -10,7 +10,6 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
     [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
     public partial class HOUSES : IXmlModel
     {
-
         private HOUSESHOUSE[] hOUSEField;
 
         /// <remarks/>
@@ -34,7 +33,6 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
     public partial class HOUSESHOUSE
     {
-
         private uint idField;
 
         private uint oBJECTIDField;
@@ -339,6 +337,4 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
             }
         }
     }
-
-
 }
