@@ -5,7 +5,6 @@ using AutoMapper;
 
 using Fias.Api.Enums;
 using Fias.Api.Interfaces.Repositories;
-using Fias.Api.Interfaces;
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Interfaces.XmlModels;
 using Fias.Api.Models.File;
@@ -14,7 +13,6 @@ using Fias.Api.Models.FiasModels.XmlModels.AddrObj;
 using Fias.Api.Models.FiasModels.XmlModels.Houses;
 using Fias.Api.Models.FiasModels.XmlModels.ParamTypes;
 using Fias.Api.Models.FiasModels.XmlModels.HousesParams;
-using Fias.Api.Repositories;
 
 namespace Fias.Api.Services
 {

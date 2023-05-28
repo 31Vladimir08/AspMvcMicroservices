@@ -1,6 +1,5 @@
 ﻿using Fias.Api.Entities;
 using Fias.Api.Enums;
-using Fias.Api.Interfaces;
 using Fias.Api.Models.Options.DataBase;
 
 using Microsoft.EntityFrameworkCore;

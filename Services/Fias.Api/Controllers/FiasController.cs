@@ -1,4 +1,5 @@
-﻿using Fias.Api.Interfaces.Services;
+﻿using Fias.Api.Exceptions;
+using Fias.Api.Interfaces.Services;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -23,15 +24,18 @@ namespace Fias.Api.Controllers
         public async Task<IActionResult> UpdateDbFromFile()
         {
             if (string.IsNullOrWhiteSpace(Request.ContentType))
-                return BadRequest();
+                throw new UserException("DGDGDGDG");
             var boundary = HeaderUtilities.RemoveQuotes(
                 MediaTypeHeaderValue.Parse(Request.ContentType).Boundary
-                ).Value;
+                ).Value ?? throw new UserException("JDJSLSLS");
+
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
 
-            var originFileName = await _fileUploadService.UploadFileAsync(reader, Asp.GetTempPath());
-            var d = originFileName.First();
-            await _fileUploadService.InsertToDbFromUploadedFileAsync(d);
+            var originFileNames = await _fileUploadService.UploadFileAsync(reader, Asp.GetTempPath());
+            originFileNames.ForEach(async file =>
+            {
+                await _fileUploadService.InsertToDbFromUploadedFileAsync(file);
+            });
 
             return Ok();
         }
@@ -41,14 +45,17 @@ namespace Fias.Api.Controllers
         public async Task<IActionResult> RestoreDbFromFile()
         {
             if (string.IsNullOrWhiteSpace(Request.ContentType))
-                return BadRequest();
+                throw new UserException("DGDGDGDG");
             var boundary = HeaderUtilities.RemoveQuotes(
                 MediaTypeHeaderValue.Parse(Request.ContentType).Boundary
-                ).Value;
+                ).Value ?? throw new UserException("JDJSLSLS");
+
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
             var originFileName = await _fileUploadService.UploadFileAsync(reader, Asp.GetTempPath());
-            var d = originFileName.First();
-            await _fileUploadService.InsertToDbFromUploadedFileAsync(d, true);
+            originFileName.ForEach(async file =>
+            {
+                await _fileUploadService.InsertToDbFromUploadedFileAsync(file, true);
+            });
 
             return Ok();
         }

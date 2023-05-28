@@ -1,5 +1,5 @@
-﻿using Fias.Api.Enums;
-using Fias.Api.Models.File;
+﻿using Fias.Api.Models.File;
+
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Fias.Api.Interfaces.Services

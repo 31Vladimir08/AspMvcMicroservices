@@ -1,5 +1,7 @@
 ﻿using System.Net;
 
+using Fias.Api.Exceptions;
+
 namespace Fias.Api.Middlewares
 {
     public class ExceptionMiddleware
@@ -19,9 +21,18 @@ namespace Fias.Api.Middlewares
         {
             var filePath = Asp.GetTempPath();
             try
-            {                
+            {
+                if (Directory.Exists(filePath))
+                    Directory.Delete(filePath, true);
                 Directory.CreateDirectory(filePath);
                 await _requestDelegate(context);
+            }
+            catch (UserException e)
+            {
+                _logger.LogError(e.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)e.HttpStatusCode;
+                await context.Response.WriteAsync(e.Message);
             }
             catch (Exception e)
             {
@@ -32,7 +43,8 @@ namespace Fias.Api.Middlewares
             }
             finally
             {
-                Directory.Delete(filePath, true);
+                if (Directory.Exists(filePath))
+                    Directory.Delete(filePath, true);
             }
         }
     }

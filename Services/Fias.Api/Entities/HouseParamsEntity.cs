@@ -29,7 +29,7 @@ namespace Fias.Api.Entities
             builder.ToTable("AS_HOUSES_PARAMS")
                 .HasKey(x => x.Id);
             builder.HasIndex(x => x.Id)
-                /*.IsUnique()*/;
+                .IsUnique();
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
