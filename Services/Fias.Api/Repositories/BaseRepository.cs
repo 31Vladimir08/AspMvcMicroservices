@@ -59,7 +59,7 @@ namespace Fias.Api.Repositories
                 _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 SetIdentityInsert<TEntity>(true);
 
-                foreach ( var entity in entities )
+                foreach (var entity in entities)
                 {
                     if (await _dbContext.Set<TEntity>()
                     .AsNoTracking().AnyAsync(q => q.Id == entity.Id))
