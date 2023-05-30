@@ -22,7 +22,7 @@ namespace Fias.Api.Repositories
 
         public async Task DeleteAllEntitiesAsync<TEntity>() where TEntity : BaseEntity
         {
-            _dbContext.Set<TEntity>().RemoveRange(_dbContext.Set<TEntity>());
+            await _dbContext.Set<TEntity>().ExecuteDeleteAsync();
             await _dbContext.SaveChangesAsync();
         }
 
@@ -88,17 +88,23 @@ namespace Fias.Api.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
+        public string GetTableNameFromEntity<TEntity>() where TEntity : BaseEntity
+        {
+            var met = _dbContext.Model.FindEntityType(typeof(TEntity));
+            var tableName = met?.GetTableName();
+            var schema = met?.GetSchema() ?? "dbo";
+            return $"[{schema}].[{tableName}]";
+        }
+
         private void SetIdentityInsert<TEntity>(bool isOne) where TEntity : BaseEntity
         {
             if (_dbOptions.TypeDb != SupportedDb.MSSQL)
                 return;
-            var met = _dbContext.Model.FindEntityType(typeof(TEntity));
-            var tableName = met?.GetTableName();
-            var schema = met?.GetSchema() ?? "dbo";
+            var tableName = GetTableNameFromEntity<TEntity>();
             if (!string.IsNullOrEmpty(tableName))
             {
                 var onOff = isOne ? "ON" : "OFF";
-                _dbContext.Database.ExecuteSqlRaw($"SET IDENTITY_INSERT {schema}.{tableName} {onOff};");
+                _dbContext.Database.ExecuteSqlRaw($"SET IDENTITY_INSERT {tableName} {onOff};");
             }
         }
     }

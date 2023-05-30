@@ -73,6 +73,7 @@ namespace Fias.Api.Services
                         {
                             var model = DeserializeFiasXml<HOUSES>(file);
                             var entities = model?.HOUSE?.AsParallel().Select(_mapper.Map<HouseEntity>).ToList();
+                            model = null;
                             await InsertsOrUpdatesAsync(entities, isRestoreDb);
                             break;
                         }
@@ -80,6 +81,7 @@ namespace Fias.Api.Services
                         {
                             var model = DeserializeFiasXml<PARAMS>(file);
                             var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<HouseParamsEntity>).ToList();
+                            model = null;
                             await InsertsOrUpdatesAsync(entities, isRestoreDb);
                             break;
                         }
@@ -88,6 +90,7 @@ namespace Fias.Api.Services
                         {
                             var model = DeserializeFiasXml<PARAMTYPES>(file);
                             var entities = model?.PARAMTYPE?.AsParallel().Select(_mapper.Map<ParamTypesEntity>).ToList();
+                            model = null;
                             await InsertsOrUpdatesAsync(entities, isRestoreDb);
                             break;
                         }
@@ -95,6 +98,7 @@ namespace Fias.Api.Services
                         {
                             var model = DeserializeFiasXml<ADDRESSOBJECTS>(file);
                             var entities = model?.OBJECT?.AsParallel().Select(_mapper.Map<AddrObjEntity>).ToList();
+                            model = null;
                             await InsertsOrUpdatesAsync(entities, isRestoreDb);
                             break;
                         }
@@ -102,6 +106,7 @@ namespace Fias.Api.Services
                         {
                             var model = DeserializeFiasXml<Models.FiasModels.XmlModels.AddrObjParams.PARAMS>(file);
                             var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<AddrObjParamEntity>).ToList();
+                            model = null;
                             await InsertsOrUpdatesAsync(entities, isRestoreDb);
                             break;
                         }
