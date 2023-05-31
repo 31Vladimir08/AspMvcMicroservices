@@ -25,61 +25,72 @@ namespace Fias.Api.Services
 
         public async Task InsertToDbFromUploadedFileAsync(TempFile uploadFile, bool isRestoreDb = false)
         {
-            await _dbContext.Database.BeginTransactionAsync();
-
-            if (isRestoreDb)
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
             {
-                await _xmlService.RemoveAllXmlTableAsync();
-            }
-
-            var fileExtencion = Path.GetExtension(uploadFile.OriginFileName)?.ToLower();
-            if (fileExtencion == ".xml")
-            {
-                await _xmlService.InsertToDbFromXmlFileAsync(uploadFile, isRestoreDb);
-            }
-            else if (fileExtencion == ".zip")
-            {
-                using (ZipArchive archive = ZipFile.OpenRead(uploadFile.FullFilePath))
+                try
                 {
-                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    if (isRestoreDb)
                     {
-                        // Gets the full path to ensure that relative segments are removed.
-                        var destinationPath = Path.Combine(
-                            $"{Path.GetDirectoryName(uploadFile.FullFilePath)}\\{Path.GetFileNameWithoutExtension(uploadFile.FullFilePath)}",
-                            Path.GetRandomFileName());
-                        var directory = Path.GetDirectoryName(destinationPath);
-                        if (!Directory.Exists(directory) && !string.IsNullOrWhiteSpace(directory))
-                            Directory.CreateDirectory(directory);
+                        await _xmlService.RemoveAllXmlTableAsync();
+                    }
 
-                        if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                    var fileExtencion = Path.GetExtension(uploadFile.OriginFileName)?.ToLower();
+                    if (fileExtencion == ".xml")
+                    {
+                        await _xmlService.InsertToDbFromXmlFileAsync(uploadFile, isRestoreDb);
+                    }
+                    else if (fileExtencion == ".zip")
+                    {
+                        using (ZipArchive archive = ZipFile.OpenRead(uploadFile.FullFilePath))
                         {
-                            // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
-                            // are case-insensitive.
-                            if (destinationPath.StartsWith(destinationPath, StringComparison.Ordinal))
+                            foreach (ZipArchiveEntry entry in archive.Entries)
                             {
-                                entry.ExtractToFile(destinationPath);
-                                await _xmlService.InsertToDbFromXmlFileAsync(new TempFile(destinationPath, entry.Name), isRestoreDb);
+                                // Gets the full path to ensure that relative segments are removed.
+                                var destinationPath = Path.Combine(
+                                    $"{Path.GetDirectoryName(uploadFile.FullFilePath)}\\{Path.GetFileNameWithoutExtension(uploadFile.FullFilePath)}",
+                                    Path.GetRandomFileName());
+                                var directory = Path.GetDirectoryName(destinationPath);
+                                if (!Directory.Exists(directory) && !string.IsNullOrWhiteSpace(directory))
+                                    Directory.CreateDirectory(directory);
+
+                                if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
+                                    // are case-insensitive.
+                                    if (destinationPath.StartsWith(destinationPath, StringComparison.Ordinal))
+                                    {
+                                        entry.ExtractToFile(destinationPath);
+                                        await _xmlService.InsertToDbFromXmlFileAsync(new TempFile(destinationPath, entry.Name), isRestoreDb);
+                                    }
+                                }
+                                else if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                                {
+
+                                }
+
+                                File.Delete(destinationPath);
                             }
                         }
-                        else if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
-                        {
-
-                        }
-
-                        File.Delete(destinationPath);
                     }
+                    else if (fileExtencion == ".txt")
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
                 }
             }
-            else if (fileExtencion == ".txt")
-            {
 
-            }
-            else
-            {
-
-            }
-
-            await _dbContext.Database.CommitTransactionAsync();
+            
         }
 
         public async Task<List<TempFile>> UploadFileAsync(MultipartReader reader, string directory)

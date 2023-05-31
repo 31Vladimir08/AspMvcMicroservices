@@ -13,7 +13,6 @@ using Fias.Api.Models.FiasModels.XmlModels.AddrObj;
 using Fias.Api.Models.FiasModels.XmlModels.Houses;
 using Fias.Api.Models.FiasModels.XmlModels.ParamTypes;
 using Fias.Api.Models.FiasModels.XmlModels.HousesParams;
-using Fias.Api.Contexts;
 
 namespace Fias.Api.Services
 {
