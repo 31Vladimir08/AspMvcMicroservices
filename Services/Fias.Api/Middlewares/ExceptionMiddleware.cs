@@ -19,12 +19,8 @@ namespace Fias.Api.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
-            var filePath = Asp.GetTempPath();
             try
             {
-                if (Directory.Exists(filePath))
-                    Directory.Delete(filePath, true);
-                Directory.CreateDirectory(filePath);
                 await _requestDelegate(context);
             }
             catch (UserException e)
@@ -40,11 +36,6 @@ namespace Fias.Api.Middlewares
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 await context.Response.WriteAsync(HttpStatusCode.InternalServerError.ToString());
-            }
-            finally
-            {
-                if (Directory.Exists(filePath))
-                    Directory.Delete(filePath, true);
             }
         }
     }

@@ -1,6 +1,8 @@
+using Fias.Api;
 using Fias.Api.AutoMapperProfile;
 using Fias.Api.Contexts;
 using Fias.Api.Extensions;
+using Fias.Api.Filters;
 using Fias.Api.Interfaces.Repositories;
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Models.Options.DataBase;
@@ -11,6 +13,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
+Start.DeleteTempDirectory();
 
 // Add services to the container.
 
@@ -31,6 +34,7 @@ builder.Services.Configure<KestrelServerOptions>(options =>
     options.Limits.MaxRequestBodySize = 268435456000
 );
 
+builder.Services.AddScoped<UploadCallsActionFilter>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IXmlService, XmlService>();
 
