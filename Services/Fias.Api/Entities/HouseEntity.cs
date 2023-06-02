@@ -30,14 +30,6 @@ namespace Fias.Api.Entities
         public byte IsActual { get; set; }
         
         public byte IsActive { get; set; }
-        
-        public string? AddNum1 { get; set; }
-        
-        public bool AddNum1Specified { get; set; }
-        
-        public byte AddType1 { get; set; }
-        
-        public bool AddType1Specified { get; set; }
     }
 
     public class HouseEntitySQLiteConfig : IEntityTypeConfiguration<HouseEntity>
@@ -109,10 +101,6 @@ namespace Fias.Api.Entities
                 .HasColumnName("ISACTIVE")
                 .HasColumnType("INTEGER")
                 .IsRequired();
-            builder.Property(s => s.AddNum1)
-                .HasColumnName("ADDNUM1")
-                .HasColumnType("TEXT")
-                .HasMaxLength(200);
         }
     }
 
@@ -180,10 +168,6 @@ namespace Fias.Api.Entities
                 .HasColumnName("ISACTIVE")
                 .HasColumnType("INT")
                 .IsRequired();
-            builder.Property(s => s.AddNum1)
-                .HasColumnName("ADDNUM1")
-                .HasColumnType("NVARCHAR(200)")
-                .HasMaxLength(200);
         }
     }
 }

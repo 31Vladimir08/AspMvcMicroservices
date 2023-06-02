@@ -47,6 +47,16 @@ namespace Fias.Api.Repositories
             SetIdentityInsert<TEntity>(false);
         }
 
+        public async Task InsertAsync<TEntity>(TEntity? entities) where TEntity : BaseEntity
+        {
+            if (entities is null)
+            {
+                return;
+            }
+
+            await _dbContext.Set<TEntity>().AddAsync(entities);
+        }
+
         public async Task InsertsOrUpdatesAsync<TEntity>(List<TEntity>? entities) where TEntity : BaseEntity
         {
             if (entities is null || entities.Count == 0)
@@ -82,6 +92,24 @@ namespace Fias.Api.Repositories
             }
         }
 
+        public async Task InsertOrUpdateAsync<TEntity>(TEntity? entity) where TEntity : BaseEntity
+        {
+            if (entity is null)
+            {
+                return;
+            }
+
+            if (await _dbContext.Set<TEntity>()
+                    .AsNoTracking().AnyAsync(q => q.Id == entity.Id))
+            {
+                _dbContext.Set<TEntity>().Update(entity);
+            }
+            else
+            {
+                _dbContext.Set<TEntity>().Add(entity);
+            }
+        }
+
         public async Task UpdateAsync<TEntity>(TEntity entity) where TEntity : BaseEntity
         {
             _dbContext.Set<TEntity>().Update(entity);
@@ -96,7 +124,7 @@ namespace Fias.Api.Repositories
             return $"[{schema}].[{tableName}]";
         }
 
-        private void SetIdentityInsert<TEntity>(bool isOne) where TEntity : BaseEntity
+        public void SetIdentityInsert<TEntity>(bool isOne) where TEntity : BaseEntity
         {
             if (_dbOptions.TypeDb != SupportedDb.MSSQL)
                 return;

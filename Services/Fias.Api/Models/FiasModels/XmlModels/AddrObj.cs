@@ -7,14 +7,14 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
     [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false, ElementName = "ADDRESSOBJECTS")]
     public partial class ADDRESSOBJECTS : IXmlModel
     {
-        private ADDRESSOBJECTSOBJECT[] oBJECTField;
+        private AddrObjModel[] oBJECTField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute("OBJECT")]
-        public ADDRESSOBJECTSOBJECT[] OBJECT
+        public AddrObjModel[] OBJECT
         {
             get
             {
@@ -31,7 +31,8 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
     [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    public partial class ADDRESSOBJECTSOBJECT
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false, ElementName = "OBJECT")]
+    public partial class AddrObjModel : IXmlRowModel
     {
 
         private uint idField;
@@ -67,7 +68,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         private byte iSACTIVEField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ID")]
         public uint ID
         {
             get
@@ -81,7 +82,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "OBJECTID")]
         public uint OBJECTID
         {
             get
@@ -95,7 +96,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "OBJECTGUID")]
         public string OBJECTGUID
         {
             get
@@ -109,7 +110,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "CHANGEID")]
         public uint CHANGEID
         {
             get
@@ -123,7 +124,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "NAME")]
         public string NAME
         {
             get
@@ -137,7 +138,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "TYPENAME")]
         public string TYPENAME
         {
             get
@@ -151,7 +152,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "LEVEL")]
         public byte LEVEL
         {
             get
@@ -165,7 +166,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "OPERTYPEID")]
         public byte OPERTYPEID
         {
             get
@@ -179,7 +180,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "PREVID")]
         public uint PREVID
         {
             get
@@ -193,7 +194,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "NEXTID")]
         public uint NEXTID
         {
             get
@@ -221,7 +222,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "UPDATEDATE")]
         public System.DateTime UPDATEDATE
         {
             get
@@ -235,7 +236,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "STARTDATE")]
         public System.DateTime STARTDATE
         {
             get
@@ -249,7 +250,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "ENDDATE")]
         public System.DateTime ENDDATE
         {
             get
@@ -263,7 +264,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ISACTUAL")]
         public byte ISACTUAL
         {
             get
@@ -277,7 +278,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.AddrObj
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ISACTIVE")]
         public byte ISACTIVE
         {
             get

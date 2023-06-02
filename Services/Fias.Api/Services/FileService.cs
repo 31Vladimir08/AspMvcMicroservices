@@ -5,7 +5,6 @@ using Fias.Api.Interfaces.Services;
 using Fias.Api.Models.File;
 
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 
 namespace Fias.Api.Services
@@ -60,7 +59,7 @@ namespace Fias.Api.Services
                                     if (destinationPath.StartsWith(destinationPath, StringComparison.Ordinal))
                                     {
                                         entry.ExtractToFile(destinationPath);
-                                        await _xmlService.InsertToDbFromXmlFileAsync(new TempFile(destinationPath, entry.Name), isRestoreDb);
+                                        await _xmlService.InsertToDbFromXmlFileAsync(new TempFile(destinationPath, entry.Name, entry.Length), isRestoreDb);
                                     }
                                 }
                                 else if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))

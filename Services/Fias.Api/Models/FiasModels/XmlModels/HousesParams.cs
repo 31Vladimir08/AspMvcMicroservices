@@ -7,14 +7,14 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
     [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
-    public partial class PARAMS : IXmlModel
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false, ElementName = "PARAMS")]
+    public partial class HousesParamModel : IXmlModel
     {
-        private PARAMSPARAM[] pARAMField;
+        private HouseParamModel[] pARAMField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute("PARAM")]
-        public PARAMSPARAM[] PARAM
+        public HouseParamModel[] PARAM
         {
             get
             {
@@ -31,7 +31,8 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
     [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    public partial class PARAMSPARAM
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false, ElementName = "PARAM")]
+    public partial class HouseParamModel : IXmlRowModel
     {
 
         private uint idField;
@@ -53,7 +54,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
         private System.DateTime eNDDATEField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ID")]
         public uint ID
         {
             get
@@ -67,7 +68,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "OBJECTID")]
         public uint OBJECTID
         {
             get
@@ -81,7 +82,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "CHANGEID")]
         public uint CHANGEID
         {
             get
@@ -95,7 +96,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "CHANGEIDEND")]
         public uint CHANGEIDEND
         {
             get
@@ -109,7 +110,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "TYPEID")]
         public byte TYPEID
         {
             get
@@ -123,7 +124,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "integer")]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "VALUE")]
         public string VALUE
         {
             get
@@ -137,7 +138,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "UPDATEDATE")]
         public System.DateTime UPDATEDATE
         {
             get
@@ -151,7 +152,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "STARTDATE")]
         public System.DateTime STARTDATE
         {
             get
@@ -165,7 +166,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.HousesParams
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "ENDDATE")]
         public System.DateTime ENDDATE
         {
             get

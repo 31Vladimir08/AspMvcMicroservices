@@ -7,14 +7,14 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
     [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false, ElementName = "HOUSES")]
     public partial class HOUSES : IXmlModel
     {
-        private HOUSESHOUSE[] hOUSEField;
+        private HouseModel[] hOUSEField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute("HOUSE")]
-        public HOUSESHOUSE[] HOUSE
+        public HouseModel[] HOUSE
         {
             get
             {
@@ -31,7 +31,8 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
     [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    public partial class HOUSESHOUSE
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false, ElementName = "HOUSE")]
+    public partial class HouseModel : IXmlRowModel
     {
         private uint idField;
 
@@ -72,7 +73,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         private bool aDDTYPE1FieldSpecified;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ID")]
         public uint ID
         {
             get
@@ -86,7 +87,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "OBJECTID")]
         public uint OBJECTID
         {
             get
@@ -100,7 +101,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "OBJECTGUID")]
         public string OBJECTGUID
         {
             get
@@ -114,7 +115,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "CHANGEID")]
         public uint CHANGEID
         {
             get
@@ -128,7 +129,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "HOUSENUM")]
         public string HOUSENUM
         {
             get
@@ -142,7 +143,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "HOUSETYPE")]
         public byte HOUSETYPE
         {
             get
@@ -156,7 +157,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "OPERTYPEID")]
         public byte OPERTYPEID
         {
             get
@@ -170,7 +171,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "PREVID")]
         public uint PREVID
         {
             get
@@ -184,7 +185,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "NEXTID")]
         public uint NEXTID
         {
             get
@@ -212,7 +213,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "UPDATEDATE")]
         public System.DateTime UPDATEDATE
         {
             get
@@ -226,7 +227,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "STARTDATE")]
         public System.DateTime STARTDATE
         {
             get
@@ -240,7 +241,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "ENDDATE")]
         public System.DateTime ENDDATE
         {
             get
@@ -254,7 +255,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ISACTUAL")]
         public byte ISACTUAL
         {
             get
@@ -268,7 +269,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ISACTIVE")]
         public byte ISACTIVE
         {
             get
@@ -282,7 +283,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ADDNUM1")]
         public string ADDNUM1
         {
             get
@@ -310,7 +311,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ADDTYPE1")]
         public byte ADDTYPE1
         {
             get

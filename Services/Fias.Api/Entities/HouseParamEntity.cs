@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fias.Api.Entities
 {
-    public class HouseParamsEntity : BaseEntity
+    public class HouseParamEntity : BaseEntity
     {
         public uint ObjectId { get; set; }
         
@@ -22,9 +22,9 @@ namespace Fias.Api.Entities
         public DateTime EndDate { get; set; }
     }
 
-    public class HouseParamsEntitySQLiteConfig : IEntityTypeConfiguration<HouseParamsEntity>
+    public class HouseParamsEntitySQLiteConfig : IEntityTypeConfiguration<HouseParamEntity>
     {
-        public void Configure(EntityTypeBuilder<HouseParamsEntity> builder)
+        public void Configure(EntityTypeBuilder<HouseParamEntity> builder)
         {
             builder.ToTable("AS_HOUSES_PARAMS")
                 .HasKey(x => x.Id);
@@ -73,9 +73,9 @@ namespace Fias.Api.Entities
         }
     }
 
-    public class HouseParamsEntityMSSQLConfig : IEntityTypeConfiguration<HouseParamsEntity>
+    public class HouseParamsEntityMSSQLConfig : IEntityTypeConfiguration<HouseParamEntity>
     {
-        public void Configure(EntityTypeBuilder<HouseParamsEntity> builder)
+        public void Configure(EntityTypeBuilder<HouseParamEntity> builder)
         {
             builder.ToTable("AS_HOUSES_PARAMS", "dbo")
                 .HasKey(x => x.Id);

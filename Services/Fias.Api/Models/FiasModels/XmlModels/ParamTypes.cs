@@ -7,14 +7,14 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
     [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false, ElementName = "PARAMTYPES")]
     public partial class PARAMTYPES : IXmlModel
     {
-        private PARAMTYPESPARAMTYPE[] pARAMTYPEField;
+        private ParamTypesModel[] pARAMTYPEField;
 
         /// <remarks/>
         [System.Xml.Serialization.XmlElementAttribute("PARAMTYPE")]
-        public PARAMTYPESPARAMTYPE[] PARAMTYPE
+        public ParamTypesModel[] PARAMTYPE
         {
             get
             {
@@ -31,7 +31,8 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
     [System.SerializableAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    public partial class PARAMTYPESPARAMTYPE
+    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false, ElementName = "PARAMTYPE")]
+    public partial class ParamTypesModel : IXmlRowModel
     {
 
         private byte idField;
@@ -51,7 +52,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
         private System.DateTime eNDDATEField;
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ID")]
         public byte ID
         {
             get
@@ -65,7 +66,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "NAME")]
         public string NAME
         {
             get
@@ -79,7 +80,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "DESC")]
         public string DESC
         {
             get
@@ -93,7 +94,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "CODE")]
         public string CODE
         {
             get
@@ -107,7 +108,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
+        [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "ISACTIVE")]
         public bool ISACTIVE
         {
             get
@@ -121,7 +122,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "UPDATEDATE")]
         public System.DateTime UPDATEDATE
         {
             get
@@ -135,7 +136,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "STARTDATE")]
         public System.DateTime STARTDATE
         {
             get
@@ -149,7 +150,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.ParamTypes
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
+        [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date", AttributeName = "ENDDATE")]
         public System.DateTime ENDDATE
         {
             get
