@@ -1,6 +1,6 @@
 ﻿using Fias.Api.Exceptions;
 using Fias.Api.Filters;
-using Fias.Api.Interfaces.Services;
+using Fias.Api.HostedServices;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -14,12 +14,12 @@ namespace Fias.Api.Controllers
     public class UploadFilesFiasController : ControllerBase
     {
         private const string KEY_DIRECTORY_NAME = "temp_directory";
-        private readonly IFileService _fileUploadService;
+        private readonly FiasUpdateDbService _fiasUpdateDbService;
 
         public UploadFilesFiasController(
-            IFileService fileUploadService)
+            FiasUpdateDbService fiasUpdateDbService)
         {
-            _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
+            _fiasUpdateDbService = fiasUpdateDbService ?? throw new ArgumentNullException(nameof(fiasUpdateDbService));
         }
 
         [HttpPost]
@@ -36,14 +36,10 @@ namespace Fias.Api.Controllers
                 ).Value ?? throw new UserException("JDJSLSLS");
 
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-
-            var originFileNames = await _fileUploadService.UploadFileAsync(reader, tempDirectory);
-            foreach (var file in originFileNames)
-            {
-                await _fileUploadService.InsertToDbFromUploadedFileAsync(file);
-            }
-
-            return Ok();
+            var isRun = await _fiasUpdateDbService.StartEventUpdateDbFromFileExecuteAsync(reader, tempDirectory);
+            return isRun
+                ? Ok(new { Status = "ok" })
+                : Ok(new { Status = "run" });
         }
 
         [HttpPost]
@@ -58,15 +54,12 @@ namespace Fias.Api.Controllers
             var boundary = HeaderUtilities.RemoveQuotes(
                 MediaTypeHeaderValue.Parse(Request.ContentType).Boundary
                 ).Value ?? throw new UserException("JDJSLSLS");
-
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-            var originFileNames = await _fileUploadService.UploadFileAsync(reader, tempDirectory);
-            foreach (var file in originFileNames)
-            {
-                await _fileUploadService.InsertToDbFromUploadedFileAsync(file, true);
-            }
 
-            return Ok();
+            var isRun = await _fiasUpdateDbService.StartEventUpdateDbFromFileExecuteAsync(reader, tempDirectory, true);
+            return isRun
+                ? Ok(new { Status = "ok" })
+                : Ok(new { Status = "run" });
         }
     }
 }

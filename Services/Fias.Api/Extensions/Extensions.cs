@@ -6,12 +6,12 @@ namespace Fias.Api.Extensions
     {
         public static void SetValueType(this PropertyInfo property, object? obj, string? value)
         {
-            var propertyType = property.PropertyType.Name == "Nullable`1"
+            var propertyType = property.PropertyType.Name == typeof(Nullable).Name
                 ? Nullable.GetUnderlyingType(property.PropertyType)
                 : property.PropertyType;
             if (string.IsNullOrWhiteSpace(value))
             {
-                if (property.PropertyType.Name == "Nullable`1" || property.PropertyType.Name == "String")
+                if (property.PropertyType.Name == typeof(Nullable).FullName || property.PropertyType.Name == typeof(string).Name)
                 {
                     property.SetValue(obj, null);
                     return;
@@ -27,41 +27,55 @@ namespace Fias.Api.Extensions
 
             switch (propertyType.Name)
             {
-                case "UInt16":
-                case "UInt32":
-                case "UInt64":
-                case "UInt128":
-                case "UIntPtr":
+                case var v when v == typeof(ushort).Name:
+                    property.SetValue(obj, ushort.Parse(value));
+                    break;
+                case var v when v == typeof(uint).Name:
                     property.SetValue(obj, uint.Parse(value));
                     break;
-                case "Int16":
-                case "Int32":
-                case "Int64":
-                case "Int128":
+                case var v when v == typeof(ulong).Name:
+                    property.SetValue(obj, ulong.Parse(value));
+                    break;
+                case var v when v == typeof(UInt128).Name:
+                    property.SetValue(obj, UInt128.Parse(value));
+                    break;
+                case var v when v == typeof(UIntPtr).Name:
+                    property.SetValue(obj, UIntPtr.Parse(value));
+                    break;
+                case var v when v == typeof(short).Name:
+                    property.SetValue(obj, short.Parse(value));
+                    break;
+                case var v when v == typeof(int).Name:
                     property.SetValue(obj, int.Parse(value));
                     break;
-                case "Single":
+                case var v when v == typeof(long).Name:
+                    property.SetValue(obj, long.Parse(value));
+                    break;
+                case var v when v == typeof(Int128).Name:
+                    property.SetValue(obj, Int128.Parse(value));
+                    break;
+                case var v when v == typeof(float).Name:
                     property.SetValue(obj, float.Parse(value));
                     break;
-                case "Double":
+                case var v when v == typeof(double).Name:
                     property.SetValue(obj, double.Parse(value));
                     break;
-                case "Decimal":
+                case var v when v == typeof(decimal).Name:
                     property.SetValue(obj, decimal.Parse(value));
                     break;
-                case "Byte":
+                case var v when v == typeof(byte).Name:
                     property.SetValue(obj, byte.Parse(value));
                     break;
-                case "DateTime":
+                case var v when v == typeof(DateTime).Name:
                     property.SetValue(obj, DateTime.Parse(value));
                     break;
-                case "Guid":
+                case var v when v == typeof(Guid).Name:
                     property.SetValue(obj, Guid.Parse(value));
                     break;
-                case "Boolean":
+                case var v when v == typeof(bool).Name:
                     property.SetValue(obj, bool.Parse(value));
                     break;
-                case "String":
+                case var v when v == typeof(string).Name:
                 default:
                     property.SetValue(obj, value);
                     break;

@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 
 using Fias.Api.Contexts;
+using Fias.Api.Filters;
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Models.File;
 
@@ -13,13 +14,16 @@ namespace Fias.Api.Services
     {
         private readonly IXmlService _xmlService;
         private readonly AppDbContext _dbContext;
+        private readonly ILogger<FileService> _loger;
 
         public FileService(
             IXmlService xmlService,
-            AppDbContext dbContext) 
+            AppDbContext dbContext,
+            ILogger<FileService> loger) 
         {
             _xmlService = xmlService ?? throw new ArgumentNullException(nameof(xmlService));
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            _loger = loger ?? throw new ArgumentNullException(nameof(loger));
         }
 
         public async Task InsertToDbFromUploadedFileAsync(TempFile uploadFile, bool isRestoreDb = false)
@@ -98,40 +102,52 @@ namespace Fias.Api.Services
             if (reader is null || string.IsNullOrWhiteSpace(directory))
                 return filesNames;
             MultipartSection section;
-            
-            while ((section = await reader.ReadNextSectionAsync()) is not null)
+            try
             {
-                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(
-                    section.ContentDisposition, out var contentDisposition
-                );
-                if (hasContentDispositionHeader)
+                Directory.CreateDirectory(directory);
+                while ((section = await reader.ReadNextSectionAsync()) is not null)
                 {
-                    if (!string.IsNullOrEmpty(contentDisposition?.FileName.Value) 
-                        && contentDisposition.DispositionType.Equals("form-data"))
+                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(
+                        section.ContentDisposition, out var contentDisposition
+                    );
+                    if (hasContentDispositionHeader)
                     {
-                        var fileSection = section.AsFileSection();
-                        if (fileSection is null || fileSection.FileStream is null)
-                            continue;
-                        var bufferSize = 32 * 1024;
-                        var buffer = new byte[bufferSize];
-                        var fullName = Path.Combine(directory, Path.GetRandomFileName());
-                        using (var fstream = new FileStream(fullName, FileMode.Create, FileAccess.Write))
+                        if (!string.IsNullOrEmpty(contentDisposition?.FileName.Value)
+                            && contentDisposition.DispositionType.Equals("form-data"))
                         {
-                            while (true)
+                            var fileSection = section.AsFileSection();
+                            if (fileSection is null || fileSection.FileStream is null)
+                                continue;
+                            var bufferSize = 32 * 1024;
+                            var buffer = new byte[bufferSize];
+                            var fullName = Path.Combine(directory, Path.GetRandomFileName());
+                            using (var fstream = new FileStream(fullName, FileMode.Create, FileAccess.Write))
                             {
-                                var bytesRead = await fileSection.FileStream.ReadAsync(buffer.AsMemory(0, bufferSize));
-                                await fstream.WriteAsync(buffer, 0, bytesRead);
-                                if (bytesRead == 0) 
-                                    break;
+                                while (true)
+                                {
+                                    var bytesRead = await fileSection.FileStream.ReadAsync(buffer.AsMemory(0, bufferSize));
+                                    await fstream.WriteAsync(buffer, 0, bytesRead);
+                                    if (bytesRead == 0)
+                                        break;
+                                }
                             }
-                        }
 
-                        filesNames.Add(new TempFile(fullName, contentDisposition.FileName.Value));
+                            filesNames.Add(new TempFile(fullName, contentDisposition.FileName.Value));
+                        }
                     }
                 }
-            }
 
-            return filesNames;
+                return filesNames;
+            }
+            catch (Exception ex)
+            {
+                _loger.LogError($"{ex.Message}; {ex.StackTrace}; {ex.InnerException};");
+                if (Directory.Exists(directory))
+                {
+                    Directory.Delete(directory, true);
+                }
+                throw;
+            }
         }
     }
 }
