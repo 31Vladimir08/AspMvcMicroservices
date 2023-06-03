@@ -1,7 +1,6 @@
 ﻿using System.IO.Compression;
 
 using Fias.Api.Contexts;
-using Fias.Api.Filters;
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Models.File;
 

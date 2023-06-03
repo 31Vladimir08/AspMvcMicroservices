@@ -1,5 +1,4 @@
-﻿using Fias.Api.Contexts;
-using Fias.Api.Entities;
+﻿using Fias.Api.Entities;
 
 namespace Fias.Api.Interfaces.Repositories
 {

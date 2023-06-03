@@ -1,5 +1,4 @@
-﻿using Fias.Api.Contexts;
-using Fias.Api.Enums;
+﻿using Fias.Api.Enums;
 using Fias.Api.Interfaces.XmlModels;
 using Fias.Api.Models.File;
 
