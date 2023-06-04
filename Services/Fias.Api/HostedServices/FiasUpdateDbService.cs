@@ -44,8 +44,8 @@ namespace Fias.Api.HostedServices
                         {
                             foreach (var file in x.tempFiles)
                             {
-                                var service = scope.ServiceProvider.GetRequiredService<IFileService>();
-                                await service.InsertToDbFromUploadedFileAsync(file, x.isRestoreDb);
+                                var service = scope.ServiceProvider.GetRequiredService<IXmlService>();
+                                await service.InsertToDbFromArchiveAsync(file, x.isRestoreDb);
                             }
                         }
                     }

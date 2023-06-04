@@ -39,7 +39,7 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<AddrObjEntity> builder)
         {
             builder.ToTable("AS_ADDR_OBJ")
-                .HasKey(x => x.Id);
+                .HasKey(x => x.PkId);
             builder.HasIndex(x => x.Id)
                 .IsUnique();
 
@@ -116,7 +116,9 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<AddrObjEntity> builder)
         {
             builder.ToTable("AS_ADDR_OBJ", "dbo")
-                .HasKey(x => x.Id);
+                .HasKey(x => x.PkId);
+            builder.HasIndex(x => x.Id)
+                .IsUnique();
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")

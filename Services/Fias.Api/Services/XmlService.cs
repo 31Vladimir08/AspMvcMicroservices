@@ -21,6 +21,7 @@ using Fias.Api.Models.FiasModels.XmlModels.AddrObjParams;
 using Fias.Api.Models.Options.DataBase;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
+using System.IO.Compression;
 
 namespace Fias.Api.Services
 {
@@ -28,18 +29,19 @@ namespace Fias.Api.Services
     {
         private Dictionary <string, XmlModelType> _attributes;
         private readonly IMapper _mapper;
-        private readonly AppDbContext _dbContext;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
+        //private readonly AppDbContext _dbContext;
         private readonly ILogger<XmlService> _loger;
         private readonly int _bufferDb;
 
         public XmlService(
             IMapper mapper,
             ILogger<XmlService> loger,
-            IOptions<DbSettingsOption> dbOptions,
-            AppDbContext dbContext)
+            IDbContextFactory<AppDbContext> contextFactory,
+            IOptions<DbSettingsOption> dbOptions)
         {
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
             _loger = loger ?? throw new ArgumentNullException(nameof(loger));
             _bufferDb = dbOptions.Value.Buffer;
             _attributes = GetXmlDictionary();
@@ -74,19 +76,19 @@ namespace Fias.Api.Services
             return isTypeExist ? type : XmlModelType.Unknown;
         }
 
-        public async Task RemoveAllXmlTableAsync()
+        private async Task RemoveAllXmlTableAsync(AppDbContext dbContext)
         {
             _loger.LogInformation($"delete all from xml table: START");
-            await _dbContext.Set<HouseEntity>().ExecuteDeleteAsync();
-            await _dbContext.Set<HouseParamEntity>().ExecuteDeleteAsync();
-            await _dbContext.Set<ParamTypesEntity>().ExecuteDeleteAsync();
-            await _dbContext.Set<AddrObjEntity>().ExecuteDeleteAsync();
-            await _dbContext.Set<AddrObjParamEntity>().ExecuteDeleteAsync();
-            await _dbContext.SaveChangesAsync();
+            await dbContext.Set<HouseEntity>().ExecuteDeleteAsync();
+            await dbContext.Set<HouseParamEntity>().ExecuteDeleteAsync();
+            await dbContext.Set<ParamTypesEntity>().ExecuteDeleteAsync();
+            await dbContext.Set<AddrObjEntity>().ExecuteDeleteAsync();
+            await dbContext.Set<AddrObjParamEntity>().ExecuteDeleteAsync();
+            await dbContext.SaveChangesAsync();
             _loger.LogInformation($"delete all from xml table: FINISH");
         }
 
-        public async Task InsertToDbFromXmlFileAsync(TempFile tempXml, bool isRestoreDb = false)
+        private async Task InsertToDbFromXmlFileAsync(AppDbContext context, TempFile tempXml, bool isRestoreDb = false)
         {
             if (string.IsNullOrWhiteSpace(tempXml.FullFilePath))
                 return;
@@ -98,35 +100,106 @@ namespace Fias.Api.Services
                 {
                     case XmlModelType.Houses:
                         {
-                            await ReadXmlWriteDbAsync<HouseModel, HouseEntity>(reader, isRestoreDb);
+                            await ReadXmlWriteDbAsync<HouseModel, HouseEntity>(context, reader, isRestoreDb);
                             break;
                         }
                     case XmlModelType.HousesParams:
                         {
-                            await ReadXmlWriteDbAsync<HouseParamModel, HouseParamEntity>(reader, isRestoreDb);
+                            await ReadXmlWriteDbAsync<HouseParamModel, HouseParamEntity>(context, reader, isRestoreDb);
                             break;
                         }
 
                     case XmlModelType.ParamTypes:
                         {
-                            await ReadXmlWriteDbAsync<ParamTypesModel, ParamTypesEntity>(reader, isRestoreDb);
+                            await ReadXmlWriteDbAsync<ParamTypesModel, ParamTypesEntity>(context, reader, isRestoreDb);
                             break;
                         }
                     case XmlModelType.AddrObj:
                         {
-                            await ReadXmlWriteDbAsync<AddrObjModel, AddrObjEntity>(reader, isRestoreDb);
+                            await ReadXmlWriteDbAsync<AddrObjModel, AddrObjEntity>(context, reader, isRestoreDb);
                             break;
                         }
                     case XmlModelType.AddrObjParams:
                         {
-                            await ReadXmlWriteDbAsync<AddrObjParamModel, AddrObjParamEntity>(reader, isRestoreDb);
+                            await ReadXmlWriteDbAsync<AddrObjParamModel, AddrObjParamEntity>(context, reader, isRestoreDb);
                             break;
                         }
                 }
             }
         }
 
-        private async Task InsertOrUpdateAsync<TEntity>(TEntity? entity, bool isRestoreDb = false) where TEntity : BaseEntity
+        public async Task InsertToDbFromArchiveAsync(TempFile uploadFile, bool isRestoreDb = false)
+        {
+            using (var context = await _contextFactory.CreateDbContextAsync())
+            {
+                using (var transaction = await context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        if (isRestoreDb)
+                        {
+                            await RemoveAllXmlTableAsync(context);
+                        }
+
+                        var fileExtencion = Path.GetExtension(uploadFile.OriginFileName)?.ToLower();
+                        if (fileExtencion == ".xml")
+                        {
+                            await InsertToDbFromXmlFileAsync(context, uploadFile, isRestoreDb);
+                        }
+                        else if (fileExtencion == ".zip")
+                        {
+                            using (ZipArchive archive = ZipFile.OpenRead(uploadFile.FullFilePath))
+                            {
+                                foreach (ZipArchiveEntry entry in archive.Entries)
+                                {
+                                    // Gets the full path to ensure that relative segments are removed.
+                                    var destinationPath = Path.Combine(
+                                        $"{Path.GetDirectoryName(uploadFile.FullFilePath)}\\{Path.GetFileNameWithoutExtension(uploadFile.FullFilePath)}",
+                                        Path.GetRandomFileName());
+                                    var directory = Path.GetDirectoryName(destinationPath);
+                                    if (!Directory.Exists(directory) && !string.IsNullOrWhiteSpace(directory))
+                                        Directory.CreateDirectory(directory);
+
+                                    if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
+                                        // are case-insensitive.
+                                        if (destinationPath.StartsWith(destinationPath, StringComparison.Ordinal))
+                                        {
+                                            entry.ExtractToFile(destinationPath);
+                                            await InsertToDbFromXmlFileAsync(context, new TempFile(destinationPath, entry.Name, entry.Length), isRestoreDb);
+                                        }
+                                    }
+                                    else if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                                    {
+
+                                    }
+
+                                    File.Delete(destinationPath);
+                                }
+                            }
+                        }
+                        else if (fileExtencion == ".txt")
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                }
+            }
+        }
+
+        private async Task InsertOrUpdateAsync<TEntity>(AppDbContext context, TEntity? entity, bool isRestoreDb = false) where TEntity : BaseEntity
         {
             if (isRestoreDb)
             {
@@ -135,7 +208,7 @@ namespace Fias.Api.Services
                     return;
                 }
 
-                await _dbContext.Set<TEntity>().AddAsync(entity);
+                await context.Set<TEntity>().AddAsync(entity);
             }
             else
             {
@@ -144,14 +217,15 @@ namespace Fias.Api.Services
                     return;
                 }
 
-                if (await _dbContext.Set<TEntity>()
-                        .AsNoTracking().AnyAsync(q => q.Id == entity.Id))
+                var element = await context.Set<TEntity>().FirstOrDefaultAsync(q => q.Id == entity.Id);
+                if (element is null)
                 {
-                    _dbContext.Set<TEntity>().Update(entity);
+                    context.Set<TEntity>().Add(entity);
                 }
                 else
                 {
-                    _dbContext.Set<TEntity>().Add(entity);
+                    entity.PkId = entity.PkId;
+                    context.Set<TEntity>().Update(entity);
                 }
             }
         }
@@ -200,15 +274,14 @@ namespace Fias.Api.Services
             return ob;
         }
 
-        private async Task ReadXmlWriteDbAsync<TModel, TEntity>(XmlReader reader, bool isRestoreDb = false)
+        private async Task ReadXmlWriteDbAsync<TModel, TEntity>(AppDbContext context, XmlReader reader, bool isRestoreDb = false)
             where TModel : class, IXmlRowModel
             where TEntity : BaseEntity
         {
             var xmlRoot = GetXmlRoot<TModel>();
             _loger.LogInformation($"Update db Table: START");
-            var iterator = 0;
-            _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            _dbContext.SetIdentityInsert<TEntity>(true);
+            var iterator = 1;
+            context.ChangeTracker.AutoDetectChangesEnabled = false;
             try
             {
                 while (await reader.ReadAsync())
@@ -221,10 +294,10 @@ namespace Fias.Api.Services
                                 {
                                     var model = GetHouseModelFromReader<TModel>(reader);
                                     var entity = _mapper.Map<TEntity>(model);
-                                    await InsertOrUpdateAsync(entity, isRestoreDb);
+                                    await InsertOrUpdateAsync(context,entity, isRestoreDb);
                                     if (iterator % _bufferDb == 0)
                                     {
-                                        await _dbContext.SaveChangesAsync();
+                                        await context.SaveChangesAsync();
                                     }
 
                                     iterator++;
@@ -235,14 +308,13 @@ namespace Fias.Api.Services
                             }
                     }
                 }
-                await _dbContext.SaveChangesAsync();
+                await context.SaveChangesAsync();
+                _loger.LogInformation($"Update db Table: FINISH");
             }
             finally
             {
-                _dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
-                _dbContext.SetIdentityInsert<TEntity>(false);
+                context.ChangeTracker.AutoDetectChangesEnabled = true;
             }
-            _loger.LogInformation($"Update db Table: FINISH");
         }
     }
 }
