@@ -117,7 +117,7 @@ namespace Fias.Api.Services
                             var fileSection = section.AsFileSection();
                             if (fileSection is null || fileSection.FileStream is null)
                                 continue;
-                            var bufferSize = 32 * 1024;
+                            var bufferSize = 4096;
                             var buffer = new byte[bufferSize];
                             var fullName = Path.Combine(directory, Path.GetRandomFileName());
                             using (var fstream = new FileStream(fullName, FileMode.Create, FileAccess.Write))

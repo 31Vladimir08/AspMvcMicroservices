@@ -42,9 +42,9 @@ namespace Fias.Api.HostedServices
                     {
                         using (var scope = _serviceProvider.CreateScope())
                         {
-                            var service = scope.ServiceProvider.GetService<IFileService>();
                             foreach (var file in x.tempFiles)
                             {
+                                var service = scope.ServiceProvider.GetRequiredService<IFileService>();
                                 await service.InsertToDbFromUploadedFileAsync(file, x.isRestoreDb);
                             }
                         }
@@ -77,7 +77,7 @@ namespace Fias.Api.HostedServices
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     _uploadFileSemaphore.WaitOne();
-                    var service = scope.ServiceProvider.GetService<IFileService>();
+                    var service = scope.ServiceProvider.GetRequiredService<IFileService>();
                     var originFileNames = await service.UploadFileAsync(reader, tempDirectory);
                     _uploadFileSemaphore.Release();
 

@@ -42,7 +42,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
 
         private uint cHANGEIDField;
 
-        private string hOUSENUMField;
+        private string? hOUSENUMField;
 
         private byte hOUSETYPEField;
 
@@ -130,7 +130,7 @@ namespace Fias.Api.Models.FiasModels.XmlModels.Houses
 
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute(AttributeName = "HOUSENUM")]
-        public string HOUSENUM
+        public string? HOUSENUM
         {
             get
             {

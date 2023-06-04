@@ -19,6 +19,8 @@ using Fias.Api.Exceptions;
 using Fias.Api.Extensions;
 using Fias.Api.Models.FiasModels.XmlModels.AddrObj;
 using Fias.Api.Models.FiasModels.XmlModels.AddrObjParams;
+using Fias.Api.Models.Options.DataBase;
+using Microsoft.Extensions.Options;
 
 namespace Fias.Api.Services
 {
@@ -29,17 +31,20 @@ namespace Fias.Api.Services
         private readonly IBaseRepository _baseRepository;
         private readonly AppDbContext _dbContext;
         private readonly ILogger<XmlService> _loger;
+        private readonly int _bufferDb;
 
         public XmlService(
             IMapper mapper,
             IBaseRepository baseRepository,
             ILogger<XmlService> loger,
+            IOptions<DbSettingsOption> dbOptions,
             AppDbContext dbContext)
         {
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _baseRepository = baseRepository ?? throw new ArgumentNullException(nameof(baseRepository));
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _loger = loger ?? throw new ArgumentNullException(nameof(loger));
+            _bufferDb = dbOptions.Value.Buffer;
             _attributes = GetXmlDictionary();
         }
 
@@ -245,6 +250,8 @@ namespace Fias.Api.Services
             var xmlRoot = GetXmlRoot<TModel>();
             _loger.LogInformation($"Update db Table: START");
             _baseRepository.SetIdentityInsert<TEntity>(true);
+            var iterator = 0;
+            _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
             while (await reader.ReadAsync())
             {
                 switch (reader.NodeType)
@@ -256,6 +263,12 @@ namespace Fias.Api.Services
                                 var model = GetHouseModelFromReader<TModel>(reader);
                                 var entity = _mapper.Map<TEntity>(model);
                                 await InsertOrUpdateAsync(entity, isRestoreDb);
+                                if (iterator % _bufferDb == 0)
+                                {
+                                    await _dbContext.SaveChangesAsync();
+                                }
+                                
+                                iterator++;
                                 break;
                             }
 
@@ -263,8 +276,9 @@ namespace Fias.Api.Services
                         }
                 }
             }
-
+            
             await _dbContext.SaveChangesAsync();
+            _dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
             _baseRepository.SetIdentityInsert<TEntity>(false);
             _loger.LogInformation($"Update db Table: FINISH");
         }

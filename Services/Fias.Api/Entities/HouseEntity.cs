@@ -11,7 +11,7 @@ namespace Fias.Api.Entities
         
         public uint ChangeId { get; set; }
         
-        public string HouseNum { get; set; }
+        public string? HouseNum { get; set; }
         
         public byte HouseType { get; set; }
         
@@ -60,8 +60,7 @@ namespace Fias.Api.Entities
             builder.Property(s => s.HouseNum)
                 .HasColumnName("HOUSENUM")
                 .HasColumnType("TEXT")
-                .HasMaxLength(200)
-                .IsRequired();
+                .HasMaxLength(200);
             builder.Property(s => s.HouseType)
                 .HasColumnName("HOUSETYPE")
                 .HasColumnType("INTEGER")
@@ -130,8 +129,7 @@ namespace Fias.Api.Entities
             builder.Property(s => s.HouseNum)
                 .HasColumnName("HOUSENUM")
                 .HasColumnType("NVARCHAR(200)")
-                .HasMaxLength(200)
-                .IsRequired();
+                .HasMaxLength(200);
             builder.Property(s => s.HouseType)
                 .HasColumnName("HOUSETYPE")
                 .HasColumnType("INT")
