@@ -1,7 +1,6 @@
 using Fias.Api;
 using Fias.Api.AutoMapperProfile;
 using Fias.Api.Contexts;
-using Fias.Api.Exceptions;
 using Fias.Api.Extensions;
 using Fias.Api.Filters;
 using Fias.Api.HostedServices;

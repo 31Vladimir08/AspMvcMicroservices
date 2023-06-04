@@ -4,7 +4,6 @@ using System.Xml.Serialization;
 using AutoMapper;
 
 using Fias.Api.Enums;
-using Fias.Api.Interfaces.Repositories;
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Interfaces.XmlModels;
 using Fias.Api.Models.File;
@@ -21,6 +20,7 @@ using Fias.Api.Models.FiasModels.XmlModels.AddrObj;
 using Fias.Api.Models.FiasModels.XmlModels.AddrObjParams;
 using Fias.Api.Models.Options.DataBase;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fias.Api.Services
 {
@@ -28,20 +28,17 @@ namespace Fias.Api.Services
     {
         private Dictionary <string, XmlModelType> _attributes;
         private readonly IMapper _mapper;
-        private readonly IBaseRepository _baseRepository;
         private readonly AppDbContext _dbContext;
         private readonly ILogger<XmlService> _loger;
         private readonly int _bufferDb;
 
         public XmlService(
             IMapper mapper,
-            IBaseRepository baseRepository,
             ILogger<XmlService> loger,
             IOptions<DbSettingsOption> dbOptions,
             AppDbContext dbContext)
         {
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _baseRepository = baseRepository ?? throw new ArgumentNullException(nameof(baseRepository));
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _loger = loger ?? throw new ArgumentNullException(nameof(loger));
             _bufferDb = dbOptions.Value.Buffer;
@@ -80,11 +77,12 @@ namespace Fias.Api.Services
         public async Task RemoveAllXmlTableAsync()
         {
             _loger.LogInformation($"delete all from xml table: START");
-            await _baseRepository.DeleteAllEntitiesAsync<HouseEntity>();
-            await _baseRepository.DeleteAllEntitiesAsync<HouseParamEntity>();
-            await _baseRepository.DeleteAllEntitiesAsync<ParamTypesEntity>();
-            await _baseRepository.DeleteAllEntitiesAsync<AddrObjEntity>();
-            await _baseRepository.DeleteAllEntitiesAsync<AddrObjParamEntity>();
+            await _dbContext.Set<HouseEntity>().ExecuteDeleteAsync();
+            await _dbContext.Set<HouseParamEntity>().ExecuteDeleteAsync();
+            await _dbContext.Set<ParamTypesEntity>().ExecuteDeleteAsync();
+            await _dbContext.Set<AddrObjEntity>().ExecuteDeleteAsync();
+            await _dbContext.Set<AddrObjParamEntity>().ExecuteDeleteAsync();
+            await _dbContext.SaveChangesAsync();
             _loger.LogInformation($"delete all from xml table: FINISH");
         }
 
@@ -126,76 +124,35 @@ namespace Fias.Api.Services
                         }
                 }
             }
-                /*using (var file = new FileStream(tempXml.FullFilePath, FileMode.Open, FileAccess.Read))
-                {
-                    switch (xmlModelType)
-                    {
-                        case XmlModelType.Houses:
-                            {
-                                var model = DeserializeFiasXml<HOUSES>(file);
-                                var entities = model?.HOUSE?.AsParallel().Select(_mapper.Map<HouseEntity>).ToList();
-                                model = null;
-                                //await InsertsOrUpdatesAsync(entities, isRestoreDb);
-                                break;
-                            }
-                        case XmlModelType.HousesParams:
-                            {
-                                var model = DeserializeFiasXml<PARAMS>(file);
-                                var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<HouseParamsEntity>).ToList();
-                                model = null;
-                                //await InsertsOrUpdatesAsync(entities, isRestoreDb);
-                                break;
-                            }
-
-                        case XmlModelType.ParamTypes:
-                            {
-                                var model = DeserializeFiasXml<PARAMTYPES>(file);
-                                var entities = model?.PARAMTYPE?.AsParallel().Select(_mapper.Map<ParamTypesEntity>).ToList();
-                                model = null;
-                                //await InsertsOrUpdatesAsync(entities, isRestoreDb);
-                                break;
-                            }
-                        case XmlModelType.AddrObj:
-                            {
-                                var model = DeserializeFiasXml<ADDRESSOBJECTS>(file);
-                                var entities = model?.OBJECT?.AsParallel().Select(_mapper.Map<AddrObjEntity>).ToList();
-                                model = null;
-                                //await InsertsOrUpdatesAsync(entities, isRestoreDb);
-                                break;
-                            }
-                        case XmlModelType.AddrObjParams:
-                            {
-                                var model = DeserializeFiasXml<Models.FiasModels.XmlModels.AddrObjParams.PARAMS>(file);
-                                var entities = model?.PARAM?.AsParallel().Select(_mapper.Map<AddrObjParamEntity>).ToList();
-                                model = null;
-                                //await InsertsOrUpdatesAsync(entities, isRestoreDb);
-                                break;
-                            }
-                    }
-                }*/
-        }
-
-        private async Task InsertsOrUpdatesAsync<TEntity>(List<TEntity>? entities, bool isRestoreDb = false) where TEntity : BaseEntity
-        {
-            if (isRestoreDb)
-            {
-                await _baseRepository.InsertsAsync(entities);
-            }
-            else
-            {
-                await _baseRepository.InsertsOrUpdatesAsync(entities);
-            }
         }
 
         private async Task InsertOrUpdateAsync<TEntity>(TEntity? entity, bool isRestoreDb = false) where TEntity : BaseEntity
         {
             if (isRestoreDb)
             {
-                await _baseRepository.InsertAsync(entity);
+                if (entity is null)
+                {
+                    return;
+                }
+
+                await _dbContext.Set<TEntity>().AddAsync(entity);
             }
             else
             {
-                await _baseRepository.InsertOrUpdateAsync(entity);
+                if (entity is null)
+                {
+                    return;
+                }
+
+                if (await _dbContext.Set<TEntity>()
+                        .AsNoTracking().AnyAsync(q => q.Id == entity.Id))
+                {
+                    _dbContext.Set<TEntity>().Update(entity);
+                }
+                else
+                {
+                    _dbContext.Set<TEntity>().Add(entity);
+                }
             }
         }
 
@@ -249,37 +206,42 @@ namespace Fias.Api.Services
         {
             var xmlRoot = GetXmlRoot<TModel>();
             _loger.LogInformation($"Update db Table: START");
-            _baseRepository.SetIdentityInsert<TEntity>(true);
             var iterator = 0;
             _dbContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            while (await reader.ReadAsync())
+            _dbContext.SetIdentityInsert<TEntity>(true);
+            try
             {
-                switch (reader.NodeType)
+                while (await reader.ReadAsync())
                 {
-                    case XmlNodeType.Element:
-                        {
-                            if (reader.LocalName == xmlRoot)
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element:
                             {
-                                var model = GetHouseModelFromReader<TModel>(reader);
-                                var entity = _mapper.Map<TEntity>(model);
-                                await InsertOrUpdateAsync(entity, isRestoreDb);
-                                if (iterator % _bufferDb == 0)
+                                if (reader.LocalName == xmlRoot)
                                 {
-                                    await _dbContext.SaveChangesAsync();
+                                    var model = GetHouseModelFromReader<TModel>(reader);
+                                    var entity = _mapper.Map<TEntity>(model);
+                                    await InsertOrUpdateAsync(entity, isRestoreDb);
+                                    if (iterator % _bufferDb == 0)
+                                    {
+                                        await _dbContext.SaveChangesAsync();
+                                    }
+
+                                    iterator++;
+                                    break;
                                 }
-                                
-                                iterator++;
+
                                 break;
                             }
-
-                            break;
-                        }
+                    }
                 }
+                await _dbContext.SaveChangesAsync();
             }
-            
-            await _dbContext.SaveChangesAsync();
-            _dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
-            _baseRepository.SetIdentityInsert<TEntity>(false);
+            finally
+            {
+                _dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
+                _dbContext.SetIdentityInsert<TEntity>(false);
+            }
             _loger.LogInformation($"Update db Table: FINISH");
         }
     }
