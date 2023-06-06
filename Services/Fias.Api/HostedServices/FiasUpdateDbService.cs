@@ -2,6 +2,7 @@
 
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Models.File;
+using Fias.Api.ViewModels.Models;
 
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -14,7 +15,7 @@ namespace Fias.Api.HostedServices
         private static readonly ConcurrentDictionary<string, bool> _sessionsRun;
         private static readonly Semaphore _uploadFileSemaphore;
         private static readonly Semaphore _updateDbFromFileSemaphore;
-        private event Action<(string tempDirectory, List<TempFile> tempFiles, bool isRestoreDb)> _executeAsyncNotify;
+        private event Action<(string tempDirectory, FileViewModel fileVM, bool isRestoreDb)> _executeAsyncNotify;
 
         static FiasUpdateDbService()
         {
@@ -42,10 +43,10 @@ namespace Fias.Api.HostedServices
                     {
                         using (var scope = _serviceProvider.CreateScope())
                         {
-                            foreach (var file in x.tempFiles)
+                            foreach (var file in x.fileVM.TempFiles)
                             {
                                 var service = scope.ServiceProvider.GetRequiredService<IXmlService>();
-                                await service.InsertToDbFromArchiveAsync(file, x.isRestoreDb);
+                                await service.InsertToDbFromArchiveAsync(file, x.fileVM.SelectedRegions, x.isRestoreDb);
                             }
                         }
                     }
@@ -78,10 +79,10 @@ namespace Fias.Api.HostedServices
                 {
                     _uploadFileSemaphore.WaitOne();
                     var service = scope.ServiceProvider.GetRequiredService<IFileService>();
-                    var originFileNames = await service.UploadFileAsync(reader, tempDirectory);
+                    var fileVM = await service.UploadFileAsync(reader, tempDirectory);
                     _uploadFileSemaphore.Release();
 
-                    _executeAsyncNotify?.Invoke((tempDirectory, originFileNames, isRestoreDb));
+                    _executeAsyncNotify?.Invoke((tempDirectory, fileVM, isRestoreDb));
                     
                 }
                 return true;

@@ -1,4 +1,5 @@
 ﻿using Fias.Api.Models.File;
+using Fias.Api.ViewModels.Models;
 
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -6,7 +7,6 @@ namespace Fias.Api.Interfaces.Services
 {
     public interface IFileService
     {
-        Task<List<TempFile>> UploadFileAsync(MultipartReader reader, string directory);
-        //Task InsertToDbFromUploadedFileAsync(TempFile uploadFile, bool isRestoreDb = false);
+        Task<FileViewModel> UploadFileAsync(MultipartReader reader, string directory);
     }
 }

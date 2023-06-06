@@ -1,8 +1,9 @@
-﻿using System.IO.Compression;
+﻿using System.Text.Json;
 
-using Fias.Api.Contexts;
 using Fias.Api.Interfaces.Services;
 using Fias.Api.Models.File;
+using Fias.Api.ViewModels.Filters;
+using Fias.Api.ViewModels.Models;
 
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
@@ -11,96 +12,20 @@ namespace Fias.Api.Services
 {
     public class FileService : IFileService
     {
-        private readonly IXmlService _xmlService;
-        private readonly AppDbContext _dbContext;
         private readonly ILogger<FileService> _loger;
 
         public FileService(
-            IXmlService xmlService,
-            AppDbContext dbContext,
             ILogger<FileService> loger) 
         {
-            _xmlService = xmlService ?? throw new ArgumentNullException(nameof(xmlService));
-            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _loger = loger ?? throw new ArgumentNullException(nameof(loger));
         }
 
-        //public async Task InsertToDbFromUploadedFileAsync(TempFile uploadFile, bool isRestoreDb = false)
-        //{
-        //    using (var transaction = await _dbContext.Database.BeginTransactionAsync())
-        //    {
-        //        try
-        //        {
-        //            if (isRestoreDb)
-        //            {
-        //                await _xmlService.RemoveAllXmlTableAsync();
-        //            }
-
-        //            var fileExtencion = Path.GetExtension(uploadFile.OriginFileName)?.ToLower();
-        //            if (fileExtencion == ".xml")
-        //            {
-        //                await _xmlService.InsertToDbFromXmlFileAsync(uploadFile, isRestoreDb);
-        //            }
-        //            else if (fileExtencion == ".zip")
-        //            {
-        //                using (ZipArchive archive = ZipFile.OpenRead(uploadFile.FullFilePath))
-        //                {
-        //                    foreach (ZipArchiveEntry entry in archive.Entries)
-        //                    {
-        //                        // Gets the full path to ensure that relative segments are removed.
-        //                        var destinationPath = Path.Combine(
-        //                            $"{Path.GetDirectoryName(uploadFile.FullFilePath)}\\{Path.GetFileNameWithoutExtension(uploadFile.FullFilePath)}",
-        //                            Path.GetRandomFileName());
-        //                        var directory = Path.GetDirectoryName(destinationPath);
-        //                        if (!Directory.Exists(directory) && !string.IsNullOrWhiteSpace(directory))
-        //                            Directory.CreateDirectory(directory);
-
-        //                        if (entry.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
-        //                        {
-        //                            // Ordinal match is safest, case-sensitive volumes can be mounted within volumes that
-        //                            // are case-insensitive.
-        //                            if (destinationPath.StartsWith(destinationPath, StringComparison.Ordinal))
-        //                            {
-        //                                entry.ExtractToFile(destinationPath);
-        //                                await _xmlService.InsertToDbFromXmlFileAsync(new TempFile(destinationPath, entry.Name, entry.Length), isRestoreDb);
-        //                            }
-        //                        }
-        //                        else if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
-        //                        {
-
-        //                        }
-
-        //                        File.Delete(destinationPath);
-        //                    }
-        //                }
-        //            }
-        //            else if (fileExtencion == ".txt")
-        //            {
-
-        //            }
-        //            else
-        //            {
-
-        //            }
-
-        //            await transaction.CommitAsync();
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            await transaction.RollbackAsync();
-        //            throw;
-        //        }
-        //    }
-
-            
-        //}
-
-        public async Task<List<TempFile>> UploadFileAsync(MultipartReader reader, string directory)
+        public async Task<FileViewModel> UploadFileAsync(MultipartReader reader, string directory)
         {
-            var filesNames = new List<TempFile>();
+            var fileVm = new FileViewModel();
             if (reader is null || string.IsNullOrWhiteSpace(directory))
-                return filesNames;
-            MultipartSection section;
+                return fileVm;
+            MultipartSection? section;
             try
             {
                 Directory.CreateDirectory(directory);
@@ -131,12 +56,24 @@ namespace Fias.Api.Services
                                 }
                             }
 
-                            filesNames.Add(new TempFile(fullName, contentDisposition.FileName.Value));
+                            fileVm.TempFiles.Add(new TempFile(fullName, contentDisposition.FileName.Value));
+                        }
+                        else if (contentDisposition is not null 
+                            && contentDisposition.DispositionType.Equals("form-data")
+                            && contentDisposition.Name == "filter")
+                        {
+                            var fileSection = section.AsFormDataSection();
+                            if (fileSection is null)
+                                continue;
+                            var json = await fileSection.GetValueAsync();
+                            var selectedRegions = JsonSerializer.Deserialize<RegionsFilterViewModel>(json)?.SelectedRegions;
+                            if (selectedRegions != null && selectedRegions.Any())
+                                fileVm.SelectedRegions = selectedRegions;
                         }
                     }
                 }
 
-                return filesNames;
+                return fileVm;
             }
             catch (Exception ex)
             {

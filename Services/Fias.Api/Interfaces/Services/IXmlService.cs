@@ -9,6 +9,6 @@ namespace Fias.Api.Interfaces.Services
         T? DeserializeFiasXml<T>(FileStream xmlFile) where T : class, IXmlModel;
         T? DeserializeFiasXml<T>(string xml) where T : class, IXmlModel;
         XmlModelType GetXmlModelTypeFromXmlFile(string xmlFileName);
-        Task InsertToDbFromArchiveAsync(TempFile uploadFile, bool isRestoreDb = false);
+        Task InsertToDbFromArchiveAsync(TempFile uploadFile, IEnumerable<string> selectdeRegions, bool isRestoreDb = false);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Fias.Api.Exceptions;
 using Fias.Api.Filters;
 using Fias.Api.HostedServices;
+using Fias.Api.ViewModels.Filters;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
