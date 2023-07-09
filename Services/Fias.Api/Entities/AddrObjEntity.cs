@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fias.Api.Entities
 {
-    public class AddrObjEntity : BaseEntity
+    public class AddrObjEntity : BaseRegionEntity
     {
         public uint ObjectId { get; set; }
 
@@ -39,9 +39,8 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<AddrObjEntity> builder)
         {
             builder.ToTable("AS_ADDR_OBJ")
-                .HasKey(x => x.PkId);
-            builder.HasIndex(x => x.Id)
-                .IsUnique();
+                .HasKey(x => x.Id);
+            builder.HasIndex(x => x.ObjectId);
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
@@ -89,6 +88,11 @@ namespace Fias.Api.Entities
                 .HasColumnName("UPDATEDATE")
                 .HasColumnType("TEXT")
                 .HasMaxLength(200)
+                .IsRequired(); 
+            builder.Property(s => s.RegionCode)
+                .HasColumnName("REGIONCODE")
+                .HasColumnType("TEXT")
+                .HasMaxLength(200)
                 .IsRequired();
             builder.Property(s => s.StartDate)
                 .HasColumnName("STARTDATE")
@@ -116,9 +120,8 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<AddrObjEntity> builder)
         {
             builder.ToTable("AS_ADDR_OBJ", "dbo")
-                .HasKey(x => x.PkId);
-            builder.HasIndex(x => x.Id)
-                .IsUnique();
+                .HasKey(x => x.Id);
+            builder.HasIndex(x => x.ObjectId);
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
@@ -126,6 +129,11 @@ namespace Fias.Api.Entities
             builder.Property(s => s.ObjectId)
                 .HasColumnName("OBJECTID")
                 .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.RegionCode)
+                .HasColumnName("REGIONCODE")
+                .HasColumnType("NVARCHAR(3)")
+                .HasMaxLength(3)
                 .IsRequired();
             builder.Property(s => s.ObjectGuid)
                 .HasColumnName("OBJECTGUID")

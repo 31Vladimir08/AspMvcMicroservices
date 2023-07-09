@@ -3,11 +3,11 @@
     public enum XmlModelType
     {
         Unknown,
-        AddrObj,
-        AddrObjParams,
-        Houses,
-        HousesParams,
-        ParamTypes
+        AS_ADDR_OBJ,
+        AS_ADDR_OBJ_PARAMS,
+        AS_HOUSES,
+        AS_HOUSES_PARAMS,
+        AS_PARAM_TYPES
     }
 
     public enum SupportedDb

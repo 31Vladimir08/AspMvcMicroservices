@@ -77,7 +77,7 @@ namespace Fias.Api.Services
             }
             catch (Exception ex)
             {
-                _loger.LogError($"{ex.Message}; {ex.StackTrace}; {ex.InnerException};");
+                _loger.LogError(ex.ToString());
                 if (Directory.Exists(directory))
                 {
                     Directory.Delete(directory, true);

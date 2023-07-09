@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fias.Api.Entities
 {
-    public class HouseEntity : BaseEntity
+    public class HouseEntity : BaseRegionEntity
     {
         public uint ObjectId { get; set; }
         
@@ -37,9 +37,8 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<HouseEntity> builder)
         {
             builder.ToTable("AS_HOUSES")
-                .HasKey(x => x.PkId);
-            builder.HasIndex(x => x.Id)
-                .IsUnique();
+                .HasKey(x => x.Id);
+            builder.HasIndex(x => x.ObjectId);
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
@@ -100,6 +99,11 @@ namespace Fias.Api.Entities
                 .HasColumnName("ISACTIVE")
                 .HasColumnType("INTEGER")
                 .IsRequired();
+            builder.Property(s => s.RegionCode)
+                .HasColumnName("REGIONCODE")
+                .HasColumnType("TEXT")
+                .HasMaxLength(200)
+                .IsRequired();
         }
     }
 
@@ -108,9 +112,8 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<HouseEntity> builder)
         {
             builder.ToTable("AS_HOUSES", "dbo")
-                .HasKey(x => x.PkId);
-            builder.HasIndex(x => x.Id)
-                .IsUnique();
+                .HasKey(x => x.Id);
+            builder.HasIndex(x => x.ObjectId);
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
@@ -167,6 +170,11 @@ namespace Fias.Api.Entities
             builder.Property(s => s.IsActive)
                 .HasColumnName("ISACTIVE")
                 .HasColumnType("INT")
+                .IsRequired();
+            builder.Property(s => s.RegionCode)
+                .HasColumnName("REGIONCODE")
+                .HasColumnType("NVARCHAR(3)")
+                .HasMaxLength(3)
                 .IsRequired();
         }
     }

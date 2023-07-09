@@ -9,7 +9,10 @@ using Fias.Api.Models.Options.DataBase;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog(SeriLogger.Configure);
 Start.DeleteTempDirectory();
 
 // Add services to the container.
@@ -21,9 +24,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<DbSettingsOption>(builder.Configuration.GetSection("DbSettings"));
 builder.Services.AddAutoMapper(typeof(AutoMapProfiler));
 builder.Services.AddDbContextFactory<AppDbContext>();
-//builder.Services.AddDbContext<AppDbContext>();
 
-//TODO надо чето с этой хуйней придумать
+
 builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 268435456000
 );

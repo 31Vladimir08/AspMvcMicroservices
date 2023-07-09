@@ -25,14 +25,14 @@ namespace Fias.Api.Middlewares
             }
             catch (UserException e)
             {
-                _logger.LogError($"{e.Message}; {e.StackTrace};");
+                _logger.LogError(e.ToString());
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)e.HttpStatusCode;
                 await context.Response.WriteAsync(e.Message);
             }
             catch (Exception e)
             {
-                _logger.LogError($"{e.Message}; {e.StackTrace}; {e.InnerException};");
+                _logger.LogError(e.ToString());
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 await context.Response.WriteAsync(HttpStatusCode.InternalServerError.ToString());

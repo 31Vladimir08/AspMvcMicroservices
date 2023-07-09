@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fias.Api.Entities
 {
-    public class AddrObjParamEntity : BaseEntity
+    public class AddrObjParamEntity : BaseRegionEntity
     {
         public uint ObjectId { get; set; }
         
@@ -27,9 +27,8 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<AddrObjParamEntity> builder)
         {
             builder.ToTable("AS_ADDR_OBJ_PARAMS")
-                .HasKey(x => x.PkId);
-            builder.HasIndex(x => x.Id)
-                .IsUnique();
+                .HasKey(x => x.Id);
+            builder.HasIndex(x => x.ObjectId);
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
@@ -70,6 +69,11 @@ namespace Fias.Api.Entities
                 .HasColumnType("TEXT")
                 .HasMaxLength(200)
                 .IsRequired();
+            builder.Property(s => s.RegionCode)
+                .HasColumnName("REGIONCODE")
+                .HasColumnType("TEXT")
+                .HasMaxLength(200)
+                .IsRequired();
         }
     }
 
@@ -78,9 +82,8 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<AddrObjParamEntity> builder)
         {
             builder.ToTable("AS_ADDR_OBJ_PARAMS", "dbo")
-                .HasKey(x => x.PkId);
-            builder.HasIndex(x => x.Id)
-                .IsUnique();
+                .HasKey(x => x.Id);
+            builder.HasIndex(x => x.ObjectId);
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
@@ -117,6 +120,11 @@ namespace Fias.Api.Entities
             builder.Property(s => s.EndDate)
                 .HasColumnName("ENDDATE")
                 .HasColumnType("DATETIME")
+                .IsRequired();
+            builder.Property(s => s.RegionCode)
+                .HasColumnName("REGIONCODE")
+                .HasColumnType("NVARCHAR(3)")
+                .HasMaxLength(3)
                 .IsRequired();
         }
     }

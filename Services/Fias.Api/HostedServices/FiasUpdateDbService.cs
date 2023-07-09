@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
 using Fias.Api.Interfaces.Services;
-using Fias.Api.Models.File;
 using Fias.Api.ViewModels.Models;
 
 using Microsoft.AspNetCore.WebUtilities;
@@ -34,38 +33,31 @@ namespace Fias.Api.HostedServices
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            try
+            _executeAsyncNotify += async (x) =>
             {
-                _executeAsyncNotify += async (x) =>
+                _updateDbFromFileSemaphore.WaitOne();
+                try
                 {
-                    _updateDbFromFileSemaphore.WaitOne();
-                    try
+                    using (var scope = _serviceProvider.CreateScope())
                     {
-                        using (var scope = _serviceProvider.CreateScope())
+                        foreach (var file in x.fileVM.TempFiles)
                         {
-                            foreach (var file in x.fileVM.TempFiles)
-                            {
-                                var service = scope.ServiceProvider.GetRequiredService<IXmlService>();
-                                await service.InsertToDbFromArchiveAsync(file, x.fileVM.SelectedRegions, x.isRestoreDb);
-                            }
+                            var service = scope.ServiceProvider.GetRequiredService<IXmlService>();
+                            await service.InsertToDbFromArchiveAsync(file, x.fileVM.SelectedRegions, x.isRestoreDb);
                         }
                     }
-                    finally
+                }
+                finally
+                {
+                    if (Directory.Exists(x.tempDirectory))
                     {
-                        if (Directory.Exists(x.tempDirectory))
-                        {
-                            Directory.Delete(x.tempDirectory, true);
-                        }
+                        Directory.Delete(x.tempDirectory, true);
+                    }
 
-                        _sessionsRun.TryRemove(new KeyValuePair<string, bool>("run", true));
-                    }
+                    _sessionsRun.TryRemove(new KeyValuePair<string, bool>("run", true));
                     _updateDbFromFileSemaphore.Release();
-                };
-            }
-            catch (Exception ex)
-            {
-                _loger.LogError($"{ex.Message} {ex.StackTrace} {ex.InnerException}");
-            }
+                }
+            };
 
             return Task.CompletedTask;
         }
@@ -77,13 +69,17 @@ namespace Fias.Api.HostedServices
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    _uploadFileSemaphore.WaitOne();
-                    var service = scope.ServiceProvider.GetRequiredService<IFileService>();
-                    var fileVM = await service.UploadFileAsync(reader, tempDirectory);
-                    _uploadFileSemaphore.Release();
-
-                    _executeAsyncNotify?.Invoke((tempDirectory, fileVM, isRestoreDb));
-                    
+                    try
+                    {
+                        _uploadFileSemaphore.WaitOne();
+                        var service = scope.ServiceProvider.GetRequiredService<IFileService>();
+                        var fileVM = await service.UploadFileAsync(reader, tempDirectory); 
+                        _executeAsyncNotify?.Invoke((tempDirectory, fileVM, isRestoreDb));
+                    }
+                    finally
+                    {
+                        _uploadFileSemaphore.Release();
+                    }
                 }
                 return true;
             }

@@ -5,6 +5,8 @@ namespace Fias.Api.Entities
 {
     public class ParamTypesEntity : BaseEntity
     {
+        public uint Id { get; set; }
+
         public string Name { get; set; }
         
         public string Desc { get; set; }
@@ -25,9 +27,7 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<ParamTypesEntity> builder)
         {
             builder.ToTable("AS_PARAM_TYPES")
-                .HasKey(x => x.PkId);
-            builder.HasIndex(x => x.Id)
-                .IsUnique();
+                .HasKey(x => x.Id);
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")
@@ -74,9 +74,7 @@ namespace Fias.Api.Entities
         public void Configure(EntityTypeBuilder<ParamTypesEntity> builder)
         {
             builder.ToTable("AS_PARAM_TYPES", "dbo")
-                .HasKey(x => x.PkId);
-            builder.HasIndex(x => x.Id)
-                .IsUnique();
+                .HasKey(x => x.Id);
 
             builder.Property(s => s.Id)
                 .HasColumnName("ID")

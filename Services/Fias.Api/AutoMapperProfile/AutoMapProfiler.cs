@@ -36,7 +36,6 @@ namespace Fias.Api.AutoMapperProfile
                 .ForMember(x => x.ISACTUAL, s => s.MapFrom(x => x.IsActual))
                 .ForMember(x => x.ISACTIVE, s => s.MapFrom(x => x.IsActive));
             CreateMap<AddrObjModel, AddrObjEntity>()
-                .ForMember(x => x.PkId, s => s.Ignore())
                 .ForMember(x => x.Id, s => s.MapFrom(x => x.ID))
                 .ForMember(x => x.ObjectId, s => s.MapFrom(x => x.OBJECTID))
                 .ForMember(x => x.ObjectGuid, s => s.MapFrom(x => x.OBJECTGUID))
@@ -64,7 +63,6 @@ namespace Fias.Api.AutoMapperProfile
                 .ForMember(x => x.STARTDATE, s => s.MapFrom(x => x.StartDate))
                 .ForMember(x => x.ENDDATE, s => s.MapFrom(x => x.EndDate));
             CreateMap<AddrObjParamModel, AddrObjParamEntity>()
-                .ForMember(x => x.PkId, s => s.Ignore())
                 .ForMember(x => x.Id, s => s.MapFrom(x => x.ID))
                 .ForMember(x => x.ObjectId, s => s.MapFrom(x => x.OBJECTID))
                 .ForMember(x => x.ChangeId, s => s.MapFrom(x => x.CHANGEID))
@@ -96,7 +94,6 @@ namespace Fias.Api.AutoMapperProfile
             //.ForMember(x => x.ADDTYPE1, s => s.MapFrom(x => x.AddType1))
             //.ForMember(x => x.ADDTYPE1Specified, s => s.MapFrom(x => x.AddType1Specified));
             CreateMap<HouseModel, HouseEntity>()
-                .ForMember(x => x.PkId, s => s.Ignore())
                 .ForMember(x => x.Id, s => s.MapFrom(x => x.ID))
                 .ForMember(x => x.ObjectId, s => s.MapFrom(x => x.OBJECTID))
                 .ForMember(x => x.ObjectGuid, s => s.MapFrom(x => x.OBJECTGUID))
@@ -127,7 +124,6 @@ namespace Fias.Api.AutoMapperProfile
                 .ForMember(x => x.STARTDATE, s => s.MapFrom(x => x.StartDate))
                 .ForMember(x => x.ENDDATE, s => s.MapFrom(x => x.EndDate));
             CreateMap<HouseParamModel, HouseParamEntity>()
-                .ForMember(x => x.PkId, s => s.Ignore())
                 .ForMember(x => x.Id, s => s.MapFrom(x => x.ID))
                 .ForMember(x => x.ObjectId, s => s.MapFrom(x => x.OBJECTID))
                 .ForMember(x => x.ChangeId, s => s.MapFrom(x => x.CHANGEID))
@@ -148,7 +144,6 @@ namespace Fias.Api.AutoMapperProfile
                 .ForMember(x => x.STARTDATE, s => s.MapFrom(x => x.StartDate))
                 .ForMember(x => x.ENDDATE, s => s.MapFrom(x => x.EndDate));
             CreateMap<ParamTypesModel, ParamTypesEntity>()
-                .ForMember(x => x.PkId, s => s.Ignore())
                 .ForMember(x => x.Id, s => s.MapFrom(x => x.ID))
                 .ForMember(x => x.Name, s => s.MapFrom(x => x.NAME))
                 .ForMember(x => x.Desc, s => s.MapFrom(x => x.DESC))

@@ -1,7 +1,6 @@
 ﻿using Fias.Api.Exceptions;
 using Fias.Api.Filters;
 using Fias.Api.HostedServices;
-using Fias.Api.ViewModels.Filters;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -27,20 +26,7 @@ namespace Fias.Api.Controllers
         [Route("updateDataBaseFromFile")]
         public async Task<IActionResult> UpdateDbFromFile()
         {
-            var tempDirectory = HttpContext.Request.Headers[KEY_DIRECTORY_NAME].ToString();
-            if (string.IsNullOrWhiteSpace(tempDirectory))
-                throw new UserException("Empty бля");
-            if (string.IsNullOrWhiteSpace(Request.ContentType))
-                throw new UserException("DGDGDGDG");
-            var boundary = HeaderUtilities.RemoveQuotes(
-                MediaTypeHeaderValue.Parse(Request.ContentType).Boundary
-                ).Value ?? throw new UserException("JDJSLSLS");
-
-            var reader = new MultipartReader(boundary, HttpContext.Request.Body);
-            var isRun = await _fiasUpdateDbService.StartEventUpdateDbFromFileExecuteAsync(reader, tempDirectory);
-            return isRun
-                ? Ok(new { Status = "ok" })
-                : Ok(new { Status = "run" });
+            throw new NotImplementedException();
         }
 
         [HttpPost]
@@ -48,13 +34,9 @@ namespace Fias.Api.Controllers
         public async Task<IActionResult> RestoreDbFromFile()
         {
             var tempDirectory = HttpContext.Request.Headers[KEY_DIRECTORY_NAME].ToString();
-            if (string.IsNullOrWhiteSpace(tempDirectory))
-                throw new UserException("Empty бля");
-            if (string.IsNullOrWhiteSpace(Request.ContentType))
-                throw new UserException("DGDGDGDG");
             var boundary = HeaderUtilities.RemoveQuotes(
                 MediaTypeHeaderValue.Parse(Request.ContentType).Boundary
-                ).Value ?? throw new UserException("JDJSLSLS");
+                ).Value;
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
 
             var isRun = await _fiasUpdateDbService.StartEventUpdateDbFromFileExecuteAsync(reader, tempDirectory, true);

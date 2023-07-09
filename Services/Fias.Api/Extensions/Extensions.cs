@@ -81,5 +81,12 @@ namespace Fias.Api.Extensions
                     break;
             }
         }
+
+        public static TEnum ToEnum<TEnum>(this string strEnumValue, TEnum defaultValue)
+        {
+            return !Enum.IsDefined(typeof(TEnum), strEnumValue) 
+                ? defaultValue 
+                : (TEnum)Enum.Parse(typeof(TEnum), strEnumValue);
+        }
     }
 }
