@@ -117,7 +117,7 @@ namespace WebApplication
         {
             logger.LogInformation(Options.ConnectionString);
             using (var scope = app.ApplicationServices.CreateScope())
-            {                
+            {
                 try
                 {
                     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
